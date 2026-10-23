@@ -40,5 +40,6 @@ Next.js 16.4 App Router, React 19, Tailwind 4, Prisma 7.10.1 + @prisma/adapter-p
 ## Status (2026-10-24, session 1)
 
 - 37/37 tests green, lint clean, `next build` green, local prod smoke verified (health, landing, auth guard 307, sample report 200, bogus share id 404).
-- Demo workspace seeded in the main DB: demo@patchledger.test / demo-password-1, sample report live at /r/ffcbff31732032a6c1e5830c42ad4d9c.
-- NOT deployed, NOT pushed to GitHub, zero outreach. All of those need explicit approval (see NEXT_ACTIONS.md).
+- LIVE (approved + deployed 2026-10-24): https://patchledger.vercel.app (Vercel project `patchledger`, team devtechedge1, git auto-deploy from main). Public repo: https://github.com/devtechedge/patchledger (no license file = all rights reserved). Demo workspace: demo@patchledger.test / demo-password-1; sample report live at /r/ffcbff31732032a6c1e5830c42ad4d9c.
+- Name check (2026-10-24, best-effort): no USPTO results for "PatchLedger"/"Patch Ledger" in web-indexed search; only an unrelated small YouTube channel. Not a clearance - proper TESS/EUIPO/UKIPO search still recommended before spending on the name. Domains: patchledger.com taken; .io/.app/.dev unregistered (RDAP, 2026-10-24).
+- Outreach approved by Dev but NOT sent (drafts in docs/outreach/; sending happens from Dev's mailbox; prospect list to be built next session).

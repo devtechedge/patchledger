@@ -22,12 +22,9 @@ Sequence assumptions (each to be tested):
 - Months 3-5: ~3.5% monthly lead-to-paid on growing funnel, low early churn, reaching 49 accounts.
 Churn risk specific to this product: if a client relationship ends, that project goes; multiple projects per account is the retention lever.
 
-## Payment provider (open gate - verify before building)
+## Payment provider (verified 2026-10-24 from official docs)
 
-Constraint: founder is India-based, selling to US/UK/EU. Stripe India availability is NOT assumed (historically invite-restricted for India-registered sole proprietors). Merchant-of-Record options (Lemon Squeezy, Paddle) handle EU/UK VAT and US sales tax, which matters for a solo founder. Actions pending approval:
-1. Verify current Lemon Squeezy eligibility, fees (base + payout), payout route to India, and tax coverage from official docs.
-2. Compare Paddle Proforma vs LS terms.
-3. Only then implement checkout + webhook; until verified, the pricing page states the pilot is free and billing is disabled.
+Constraint: founder is India-based, selling to US/UK/EU. VERIFIED: Lemon Squeezy fees are 5% + 50c per transaction, $0/mo, and as Merchant of Record it "takes on the liability of tax collection and calculation and pays taxes on your behalf" (global VAT + sales tax included). India: LS docs state bank payouts need Stripe pre-approval because "from May 2024, Stripe only accepts new accounts from India on an invite-only basis"; the supported route for India is PayPal payouts (200+ countries; PayPal's own docs confirm India can receive/withdraw INR). Decision: Lemon Squeezy with PayPal payouts is the billing path when a pilot asks to pay; checkout + webhook unbuilt by design until then. Sources: lemonsqueezy.com/pricing, docs.lemonsqueezy.com/help/getting-started/supported-countries + /getting-paid, developer.paypal.com/payouts/supported-features (all checked 2026-10-24).
 
 ## Metrics to track from day 1
 
