@@ -1,0 +1,173 @@
+// PatchLedger schema. Portable types only (String/Int/DateTime/Boolean) and
+// string enums so values stay greppable in SQL; the app layer validates them.
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Account {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  passwordHash String
+  name         String
+  agencyName   String    @default("")
+  contactEmail String?
+  accentColor  String    @default("#2563eb")
+  plan         String    @default("starter") // starter | studio | agency | demo
+  isDemo       Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+  sessions     Session[]
+  projects     Project[]
+
+  @@index([email])
+}
+
+model Session {
+  id        String   @id // sha256 of the cookie token
+  accountId String
+  account   Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([accountId])
+}
+
+model Project {
+  id              String    @id @default(cuid())
+  accountId       String
+  account         Account   @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  name            String
+  clientName      String    @default("")
+  notes           String    @default("")
+  stack           String    @default("")
+  // remediation SLA targets in days; 0 disables the SLA for that severity
+  slaCriticalDays Int       @default(14)
+  slaHighDays     Int       @default(30)
+  slaMediumDays   Int       @default(90)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  snapshots       Snapshot[]
+  findings        Finding[]
+  reports         Report[]
+
+  @@index([accountId])
+}
+
+// One imported scanner file (npm audit --json / osv-scanner --json).
+model Snapshot {
+  id          String   @id @default(cuid())
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  accountId   String
+  source      String // npm_audit | osv_scanner
+  label       String   @default("") // optional filename/note from the importer
+  findingCount Int
+  statsJson   String // frozen import summary: counts by severity, totals
+  importedAt  DateTime @default(now())
+
+  @@index([projectId, importedAt])
+}
+
+// One advisory-level vulnerability per project, deduped across imports by
+// (ecosystem, package, advisoryId). Status/evidence is the agency's record.
+model Finding {
+  id               String    @id @default(cuid())
+  projectId        String
+  project          Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  accountId        String
+  ecosystem        String // npm | pypi | go | crates | maven | other
+  packageName      String
+  advisoryId       String // GHSA-... | CVE-... | OSV/GO/PYSEC id or derived slug
+  advisoryUrl      String    @default("")
+  title            String    @default("")
+  severity         String    @default("unknown") // critical | high | medium | low | unknown
+  installedVersion String    @default("")
+  vulnerableRange  String    @default("")
+  isDirect         Boolean   @default(false)
+  isDev            Boolean   @default(false)
+  fixAvailable     Boolean   @default(false)
+  fixVersion       String    @default("")
+  fixIsSemverMajor Boolean   @default(false) // fix exists but is a breaking major bump
+  status           String    @default("open") // open | in_progress | fixed | verified | false_positive | accepted
+  statusReason     String    @default("")
+  firstSource      String    @default("") // npm_audit | osv_scanner
+  lastSource       String    @default("")
+  firstSeenAt      DateTime  @default(now())
+  lastSeenAt       DateTime  @default(now())
+  resolvedAt       DateTime?
+  // fix evidence (required to move to "fixed" beyond auto-detection)
+  fixUrl           String? // PR / commit / release link
+  fixNote          String?
+  fixedInVersion   String?
+  // verification evidence (required for "verified")
+  verifiedAt       DateTime?
+  verifyType       String? // tests | build | deploy_check | manual
+  verifyUrl        String?
+  verifyNote       String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  events           FindingEvent[]
+
+  @@unique([projectId, ecosystem, packageName, advisoryId])
+  @@index([projectId, status])
+  @@index([accountId])
+}
+
+// Append-only status/evidence history per finding.
+model FindingEvent {
+  id         String   @id @default(cuid())
+  findingId  String
+  finding    Finding  @relation(fields: [findingId], references: [id], onDelete: Cascade)
+  kind       String   @default("manual") // manual | auto_import
+  fromStatus String
+  toStatus   String
+  note       String   @default("")
+  createdAt  DateTime @default(now())
+
+  @@index([findingId, createdAt])
+}
+
+// Frozen client-facing report. summaryJson is immutable once generated so a
+// shared link keeps showing the evidence exactly as it was at generation time.
+model Report {
+  id          String   @id @default(cuid())
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  accountId   String
+  publicId    String   @unique
+  title       String
+  periodLabel String   @default("")
+  agencyNote  String   @default("")
+  brandingJson String // {agencyName, contactEmail, accentColor, clientName}
+  summaryJson String // frozen: counts, SLA stats, fixed/verified/new lists, limitations
+  status      String   @default("published") // published | revoked
+  createdAt   DateTime @default(now())
+  revokedAt   DateTime?
+
+  @@index([accountId, createdAt])
+}
+
+model AuditEvent {
+  id         String   @id @default(cuid())
+  accountId  String
+  action     String // signup | login | login_failed | logout | import | status_change | report_create | report_revoke | account_update | account_delete
+  targetType String   @default("")
+  targetId   String   @default("")
+  metaJson   String   @default("{}") // small counts/labels only, never raw imported payloads
+  createdAt  DateTime @default(now())
+
+  @@index([accountId, createdAt])
+}
+
+model RateLimit {
+  id        String   @id @default(cuid())
+  bucket    String
+  action    String
+  createdAt DateTime @default(now())
+
+  @@index([bucket, action, createdAt])
+}
