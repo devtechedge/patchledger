@@ -5,7 +5,11 @@
  * - one published client report.
  * Idempotent: deletes the previous demo account first.
  */
-process.loadEnvFile?.();
+try {
+  process.loadEnvFile();
+} catch {
+  // no .env file (CI); env must come from the environment
+}
 
 import { prisma } from "../lib/db";
 import { hashPassword } from "../lib/password";
