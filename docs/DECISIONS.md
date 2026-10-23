@@ -1,0 +1,17 @@
+# Decisions
+
+## 2026-10-24 (session 1)
+
+1. Chose evidence-backed dependency-maintenance tracking + client reports ("PatchLedger", scorecard 33/40) over security-questionnaire automation (29) and pen-test remediation packs (27). Primary reasons: questionnaire space re-crowding fast + AI-cost/liability profile violates founder constraints; pen-test packs are annual/episodic. Full evidence in IDEA_SCORECARD.md.
+2. Renamed from PatchProof: name actively collides (github.com/asseral1012/patchproof, patchproof.co.uk, Devpost, SSRN). DepProof and FixProof also live. PatchLedger: no software product found on a 2026-10-24 search; trademark/domain check still open before anything public.
+3. NOT a scanner. Parsing imported `npm audit --json` / `osv-scanner --json` only. Scanning is free and commoditized; the gap is evidence + proof. This also keeps the product read-only/least-privilege by design (no repo access, no tokens, no outbound requests to customer systems).
+4. Evidence semantics: `fixed` requires a fix reference or note; `verified` additionally requires a verification type + passing run link/note; auto-closure on re-import is labelled auto and never verified; false-positive/accepted require a client-readable reason. Reports carry a fixed limitations statement ("not a penetration test, code audit, or security certification").
+5. Auto-close scope rule: only same-source disappearance auto-closes (an npm-audit finding vanishing from an npm-audit import). Cross-source imports never auto-close anything (different coverage). Documented in UI and tests.
+6. Report immutability: summaries are frozen into the Report row at generation; a shared link always shows what was generated; revocation 404s immediately.
+7. No AI anywhere in the product path. Deterministic parsing, merging, SLA math, reporting. Documented data flow in SECURITY.md; nothing is sent to any model.
+8. Stack mirrors CareProof (Next 16.4.3, React 19.3, Tailwind 4, Prisma 7.10.1 pinned + @prisma/adapter-pg, Neon Postgres, Vitest 5) to reuse the proven Vercel deploy path and known gotchas.
+9. Databases: dedicated `patchledger` + `patchledger_test` on the existing Neon us-east-1 host (same pattern as CareProof; move to a dedicated Neon project before paid launch).
+10. Vitest globalSetup replaced with a pre-test script (`npm test` runs `scripts/push-test-schema.mjs` first): vitest 5.0.5 + vite 8.3.5's module-runner crashes evaluating globalSetup files in this dependency tree (rolldown parse of TS, then a sourcemap TypeError). CareProof's older lockfile is unaffected. Config kept as .mjs.
+11. Session incident: scripts/setup-env.mjs initially wrote DATABASE_URL_TEST pointing at CareProof's production database (bad string replace: no `careproof_test` segment in the source URL). Prisma refused the destructive push, so CareProof data was never modified (verified: all tables + demo data intact). .env fixed; test URLs now point at the empty `patchledger_test`. Lesson recorded: derive test URLs from the corrected main URLs, and assert the derived name before writing.
+12. Billing NOT implemented: Lemon Squeezy eligibility/fees for an India-based founder are unverified (open gate). Plan limits exist in code (3/15/50 projects) so a billing switch-on is a config change.
+13. No deploy, no GitHub push, no outreach this session - all require explicit approval (NEXT_ACTIONS.md).
