@@ -17,11 +17,11 @@ https://patchledger.vercel.app
 
 | Landing | Findings and SLA | Client report |
 | --- | --- | --- |
-| ![Landing page](docs/screenshots/01-landing.png) | ![Findings list](docs/screenshots/02-project-findings.png) | ![Client report](docs/screenshots/04-client-report.png) |
+| ![Landing page](docs/screenshots/01-landing.png) | ![Findings list](docs/screenshots/03-project-findings.png) | ![Client report](docs/screenshots/06-client-report.png) |
 
 | Finding evidence | Import |
 | --- | --- |
-| ![Finding detail with evidence forms](docs/screenshots/03-finding-evidence.png) | ![Scanner JSON import](docs/screenshots/05-import.png) |
+| ![Finding detail with evidence history](docs/screenshots/04-finding-evidence.png) | ![Scanner JSON import](docs/screenshots/05-import.png) |
 
 ## What it does
 
