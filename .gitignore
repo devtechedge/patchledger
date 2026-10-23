@@ -10,3 +10,8 @@ generated/
 .vercel
 next-env.d.ts
 .DS_Store
+
+.vercel
+.env*
+test-results/
+playwright-report/
