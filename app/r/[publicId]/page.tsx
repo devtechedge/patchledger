@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { getReportByPublicId } from "@/lib/services";
 import type { ReportBranding } from "@/components/report-view";
 import { ReportView } from "@/components/report-view";
+import { ThemeToggle } from "@/components/theme-toggle";
 import type { ReportSummary } from "@/lib/report";
 
 export const dynamic = "force-dynamic";
@@ -29,7 +30,10 @@ export default async function PublicReportPage({
       <div className="no-print border-b border-[var(--border)] bg-[var(--surface)]">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-6 py-3 text-xs text-[var(--faint)]">
           <span>Shared maintenance report - unlisted link (noindex)</span>
-          <span>Generated {report.createdAt.toISOString().slice(0, 10)}</span>
+          <div className="flex items-center gap-3">
+            <span>Generated {report.createdAt.toISOString().slice(0, 10)}</span>
+            <ThemeToggle />
+          </div>
         </div>
       </div>
       <ReportView

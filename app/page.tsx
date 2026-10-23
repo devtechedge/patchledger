@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { PLANS } from "@/lib/plans";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export const dynamic = "force-dynamic";
 
@@ -33,7 +34,7 @@ export default async function LandingPage() {
             />
             PatchLedger
           </div>
-          <nav className="flex items-center gap-4 text-sm">
+          <nav className="flex items-center gap-3 text-sm">
             <Link href="/pricing" className="text-[var(--muted)] hover:text-[var(--ink)]">
               Pricing
             </Link>
@@ -47,6 +48,7 @@ export default async function LandingPage() {
             >
               Start free
             </Link>
+            <ThemeToggle />
           </nav>
         </div>
       </header>

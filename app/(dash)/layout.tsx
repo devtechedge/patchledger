@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { currentAccount } from "@/lib/auth";
 import { LogoutButton } from "@/components/dashboard-forms";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export default async function DashLayout({ children }: { children: React.ReactNode }) {
   const account = await currentAccount();
@@ -27,6 +28,7 @@ export default async function DashLayout({ children }: { children: React.ReactNo
           </div>
           <div className="flex items-center gap-4 text-sm">
             <span className="text-[var(--faint)]">{account.email}</span>
+            <ThemeToggle />
             <LogoutButton />
           </div>
         </div>
