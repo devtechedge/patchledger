@@ -1,0 +1,56 @@
+@import "tailwindcss";
+
+:root {
+  color-scheme: light;
+  --bg: #eef1f6;
+  --surface: #fcfdff;
+  --surface-2: #f0f3f8;
+  --ink: #101828;
+  --muted: #46536a;
+  --faint: #7d8899;
+  --border: #d5dce6;
+  --accent: #2563eb;
+  --good: #15803d;
+  --warn: #b45309;
+  --bad: #b91c1c;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --bg: #0b1220;
+    --surface: #121b2d;
+    --surface-2: #0e1626;
+    --ink: #e3e9f2;
+    --muted: #98a4b8;
+    --faint: #64748b;
+    --border: #22304a;
+    --accent: #3b82f6;
+    --good: #4ade80;
+    --warn: #fbbf24;
+    --bad: #f87171;
+  }
+}
+
+@theme inline {
+  --color-background: var(--bg);
+  --color-foreground: var(--ink);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+}
+
+/* print styles for the shareable client report */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: #fff;
+    color: #000;
+  }
+}
