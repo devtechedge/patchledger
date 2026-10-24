@@ -23,7 +23,7 @@ Full details live in [docs/SECURITY.md](docs/SECURITY.md). Summary of the honest
 
 ## Rate limits
 
-DB-backed sliding windows: signup 5/IP/day, login 10/email/hour and 20/IP/hour, import 20/account/hour, report generation 15/account/hour. Failed logins write no rows for unknown emails, so the audit log cannot be used to enumerate accounts, and responses are identical for unknown email versus wrong password.
+DB-backed sliding windows: signup 5/IP/day, login 20/email/hour and 20/IP/hour, import 20/account/hour, report generation 15/account/hour, shared-report views 120/IP/hour, password-reset requests 5/email/hour and 20/IP/hour. Failed logins write no rows for unknown emails, so the audit log cannot be used to enumerate accounts, and responses are identical for unknown email versus wrong password.
 
 ## Reporting honesty rules
 

@@ -29,7 +29,9 @@ export async function rateLimit(
 
 export const LIMITS = {
   signupPerIpPerDay: 5,
-  loginPerEmailPerHour: 10,
+  // 20/hour per email: tight against guessing, loose enough for CI/e2e runs
+  // and multi-device teams sharing a demo account
+  loginPerEmailPerHour: 20,
   loginPerIpPerHour: 20,
   importPerAccountPerHour: 20,
   reportPerAccountPerHour: 15,
