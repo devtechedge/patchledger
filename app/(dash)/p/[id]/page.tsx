@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { currentAccount } from "@/lib/auth";
+import { requirePageAccount } from "@/lib/auth";
 import { NotFoundError, getProject, listFindings, listSnapshots } from "@/lib/services";
 import { isBreached, slaSummary } from "@/lib/sla";
 import { Empty, Panel, SeverityChip, Stat, StatusChip } from "@/components/ui";
@@ -16,7 +16,7 @@ export default async function ProjectPage({
 }: PageProps<"/p/[id]">) {
   const { id } = await params;
   const sp = await searchParams;
-  const account = (await currentAccount())!;
+  const account = await requirePageAccount();
 
   let project;
   try {

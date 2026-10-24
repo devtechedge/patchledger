@@ -1,4 +1,4 @@
-import { currentAccount } from "@/lib/auth";
+import { requirePageAccount } from "@/lib/auth";
 import { getAccountProfile, listAuditEvents } from "@/lib/services";
 import { planFor } from "@/lib/plans";
 import { AccountForm, DeleteAccountForm } from "@/components/dashboard-forms";
@@ -7,7 +7,7 @@ import { Panel } from "@/components/ui";
 export const metadata = { title: "Account - PatchLedger" };
 
 export default async function AccountPage() {
-  const account = (await currentAccount())!;
+  const account = await requirePageAccount();
   const profile = await getAccountProfile(account.id);
   const events = await listAuditEvents(account.id, 20);
   const plan = planFor(profile.plan);

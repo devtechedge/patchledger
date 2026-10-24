@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { currentAccount } from "@/lib/auth";
+import { requirePageAccount } from "@/lib/auth";
 import { NotFoundError, getProject } from "@/lib/services";
 import { ImportForm } from "@/components/dashboard-forms";
 import { Panel } from "@/components/ui";
@@ -9,7 +9,7 @@ export const metadata = { title: "Import scan - PatchLedger" };
 
 export default async function ImportPage({ params }: PageProps<"/p/[id]/import">) {
   const { id } = await params;
-  const account = (await currentAccount())!;
+  const account = await requirePageAccount();
   let project;
   try {
     project = await getProject(account.id, id);

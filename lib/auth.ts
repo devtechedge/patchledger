@@ -1,5 +1,6 @@
 import { createHash, randomBytes } from "node:crypto";
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { prisma } from "./db";
 
 const SESSION_COOKIE = "pl_session";
@@ -83,4 +84,15 @@ export async function destroyOtherSessions(
   await prisma.session.deleteMany({
     where: { accountId, id: { not: keepSessionId } },
   });
+}
+
+/**
+ * Page-level guard: layouts and pages render in parallel in production, so a
+ * page cannot assume the layout's redirect happened. Every dashboard page
+ * calls this instead of asserting non-null on the current account.
+ */
+export async function requirePageAccount(): Promise<Account> {
+  const account = await currentAccount();
+  if (!account) redirect("/login");
+  return account;
 }

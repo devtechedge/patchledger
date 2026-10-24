@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { currentAccount } from "@/lib/auth";
+import { requirePageAccount } from "@/lib/auth";
 import { NotFoundError, getFinding } from "@/lib/services";
 import { daysOpen, isBreached } from "@/lib/sla";
 import { SeverityChip, StatusChip } from "@/components/ui";
@@ -21,7 +21,7 @@ export default async function FindingPage({
   params,
 }: PageProps<"/p/[id]/f/[findingId]">) {
   const { id, findingId } = await params;
-  const account = (await currentAccount())!;
+  const account = await requirePageAccount();
   let finding;
   try {
     finding = await getFinding(account.id, findingId);

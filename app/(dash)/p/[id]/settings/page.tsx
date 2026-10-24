@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { currentAccount } from "@/lib/auth";
+import { requirePageAccount } from "@/lib/auth";
 import { NotFoundError, getProject } from "@/lib/services";
 import { SettingsForm } from "@/components/dashboard-forms";
 import { Panel } from "@/components/ui";
@@ -9,7 +9,7 @@ export const metadata = { title: "Project settings - PatchLedger" };
 
 export default async function SettingsPage({ params }: PageProps<"/p/[id]/settings">) {
   const { id } = await params;
-  const account = (await currentAccount())!;
+  const account = await requirePageAccount();
   let project;
   try {
     project = await getProject(account.id, id);

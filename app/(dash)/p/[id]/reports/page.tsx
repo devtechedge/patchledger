@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { currentAccount } from "@/lib/auth";
+import { requirePageAccount } from "@/lib/auth";
 import { NotFoundError, getProject, listReports } from "@/lib/services";
 import { revokeReportAction } from "@/app/(dash)/actions";
 import { GenerateReportForm } from "@/components/dashboard-forms";
@@ -10,7 +10,7 @@ export const metadata = { title: "Reports - PatchLedger" };
 
 export default async function ReportsPage({ params }: PageProps<"/p/[id]/reports">) {
   const { id } = await params;
-  const account = (await currentAccount())!;
+  const account = await requirePageAccount();
   let project;
   try {
     project = await getProject(account.id, id);

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { currentAccount } from "@/lib/auth";
+import { requirePageAccount } from "@/lib/auth";
 import { listProjects } from "@/lib/services";
 import { planFor } from "@/lib/plans";
 import { CreateProjectForm } from "@/components/dashboard-forms";
@@ -8,7 +8,7 @@ import { Empty, Panel } from "@/components/ui";
 export const metadata = { title: "Projects - PatchLedger" };
 
 export default async function DashboardPage() {
-  const account = (await currentAccount())!;
+  const account = await requirePageAccount();
   const projects = await listProjects(account.id);
   const plan = planFor(account.plan);
 
