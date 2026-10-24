@@ -69,16 +69,16 @@ export default async function LandingPage() {
               PATCHLEDGER
             </span>
           </Link>
-          <nav className="flex items-center gap-5 text-sm">
-            <Link href="/pricing" className="text-[var(--muted)] hover:text-[var(--ink)]">
+          <nav className="flex items-center gap-3 sm:gap-5 text-sm">
+            <Link href="/pricing" className="hidden text-[var(--muted)] hover:text-[var(--ink)] sm:inline">
               Pricing
             </Link>
-            <Link href="/login" className="text-[var(--muted)] hover:text-[var(--ink)]">
+            <Link href="/login" className="hidden text-[var(--muted)] hover:text-[var(--ink)] sm:inline">
               Sign in
             </Link>
             <Link
               href="/signup"
-              className="bg-[var(--accent)] px-4 py-1.5 font-mono text-xs font-semibold uppercase tracking-[0.16em] text-[var(--accent-ink)] hover:brightness-110"
+              className="bg-[var(--accent)] px-3 py-1.5 font-mono text-xs font-semibold uppercase tracking-[0.16em] text-[var(--accent-ink)] hover:brightness-110 sm:px-4"
             >
               Start free
             </Link>
@@ -123,36 +123,38 @@ export default async function LandingPage() {
               </p>
             </div>
 
-            <div className="border border-[var(--border)] bg-[var(--surface)] shadow-[0_0_0_1px_var(--border)]">
+            <div className="min-w-0 border border-[var(--border)] bg-[var(--surface)] shadow-[0_0_0_1px_var(--border)]">
               <div className="flex items-center justify-between border-b border-[var(--border)] px-4 py-2.5">
                 <span className="font-mono text-xs text-[var(--faint)]">npm audit --json</span>
                 <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--accent)]">
                   live record
                 </span>
               </div>
-              <div className="grid">
-                <div className="grid grid-cols-[1.6fr_1.4fr_auto] gap-x-4 border-b border-[var(--border)] px-4 py-2">
-                  <span className="microlabel">package</span>
-                  <span className="microlabel">advisory</span>
-                  <span className="microlabel text-right">state</span>
-                </div>
-                {TERMINAL_ROWS.map((r) => (
-                  <div
-                    key={r.rest}
-                    className="grid grid-cols-[1.6fr_1.4fr_auto] items-center gap-x-4 border-b border-[var(--border)] px-4 py-2.5 font-mono text-xs last:border-b-0"
-                  >
-                    <span className="text-[var(--ink)]">{r.pkg}</span>
-                    <span className="truncate text-[var(--faint)]">
-                      <span className={`mr-2 uppercase ${r.sev === "critical" ? "text-[var(--bad)]" : r.sev === "high" ? "text-[var(--warn)]" : "text-[var(--med)]"}`}>
-                        {r.sev}
-                      </span>
-                      {r.rest}
-                    </span>
-                    <span className={`text-right text-[10px] font-semibold tracking-[0.16em] ${r.stateCls}`}>
-                      {r.state}
-                    </span>
+              <div className="overflow-x-auto">
+                <div className="min-w-[460px]">
+                  <div className="grid grid-cols-[1.6fr_1.4fr_auto] gap-x-4 border-b border-[var(--border)] px-4 py-2">
+                    <span className="microlabel">package</span>
+                    <span className="microlabel">advisory</span>
+                    <span className="microlabel text-right">state</span>
                   </div>
-                ))}
+                  {TERMINAL_ROWS.map((r) => (
+                    <div
+                      key={r.rest}
+                      className="grid grid-cols-[1.6fr_1.4fr_auto] items-center gap-x-4 border-b border-[var(--border)] px-4 py-2.5 font-mono text-xs last:border-b-0"
+                    >
+                      <span className="text-[var(--ink)]">{r.pkg}</span>
+                      <span className="truncate text-[var(--faint)]">
+                        <span className={`mr-2 uppercase ${r.sev === "critical" ? "text-[var(--bad)]" : r.sev === "high" ? "text-[var(--warn)]" : "text-[var(--med)]"}`}>
+                          {r.sev}
+                        </span>
+                        {r.rest}
+                      </span>
+                      <span className={`text-right text-[10px] font-semibold tracking-[0.16em] ${r.stateCls}`}>
+                        {r.state}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
               <div className="flex items-center justify-between border-t border-[var(--border)] px-4 py-2.5">
                 <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--faint)]">

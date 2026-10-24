@@ -48,7 +48,7 @@ export default async function ProjectPage({
   };
 
   return (
-    <div className="grid gap-8">
+    <div className="flex flex-col gap-8">
       <div className="flex flex-wrap items-end justify-between gap-3 border-b border-[var(--border)] pb-5">
         <div>
           <p className="microlabel">
@@ -141,39 +141,41 @@ export default async function ProjectPage({
             Nothing here. Import scanner output to start tracking, or adjust the filters.
           </Empty>
         ) : (
-          <div className="grid">
-            <div className="grid grid-cols-[1.6fr_1fr_auto_auto_auto] items-center gap-x-4 border-b border-[var(--border)] pb-2">
-              <span className="microlabel">advisory</span>
-              <span className="microlabel">package</span>
-              <span className="microlabel text-right">sev</span>
-              <span className="microlabel text-right">state</span>
-              <span className="microlabel text-right">id</span>
+          <div className="overflow-x-auto">
+            <div className="min-w-[680px]">
+              <div className="grid grid-cols-[1.6fr_1fr_auto_auto_auto] items-center gap-x-4 border-b border-[var(--border)] pb-2">
+                <span className="microlabel">advisory</span>
+                <span className="microlabel">package</span>
+                <span className="microlabel text-right">sev</span>
+                <span className="microlabel text-right">state</span>
+                <span className="microlabel text-right">id</span>
+              </div>
+              {findings.map((f) => (
+                <Link
+                  key={f.id}
+                  href={`/p/${project.id}/f/${f.id}`}
+                  className="grid grid-cols-[1.6fr_1fr_auto_auto_auto] items-center gap-x-4 border-b border-[var(--border)] py-2.5 last:border-b-0 hover:bg-[var(--surface-2)]"
+                >
+                  <span className="truncate text-sm">{f.title}</span>
+                  <span className="truncate font-mono text-xs text-[var(--muted)]">
+                    {f.packageName}
+                    {f.installedVersion ? `@${f.installedVersion}` : ""}
+                  </span>
+                  <span className="text-right">
+                    <SeverityChip severity={f.severity} />
+                  </span>
+                  <span className="flex items-center justify-end gap-2">
+                    {isBreached(f, project, now) ? (
+                      <span className="border border-[var(--bad)] px-1.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--bad)]">
+                        past due
+                      </span>
+                    ) : null}
+                    <StatusChip status={f.status} />
+                  </span>
+                  <span className="text-right font-mono text-[10px] text-[var(--faint)]">{f.advisoryId}</span>
+                </Link>
+              ))}
             </div>
-            {findings.map((f) => (
-              <Link
-                key={f.id}
-                href={`/p/${project.id}/f/${f.id}`}
-                className="grid grid-cols-[1.6fr_1fr_auto_auto_auto] items-center gap-x-4 border-b border-[var(--border)] py-2.5 last:border-b-0 hover:bg-[var(--surface-2)]"
-              >
-                <span className="truncate text-sm">{f.title}</span>
-                <span className="truncate font-mono text-xs text-[var(--muted)]">
-                  {f.packageName}
-                  {f.installedVersion ? `@${f.installedVersion}` : ""}
-                </span>
-                <span className="text-right">
-                  <SeverityChip severity={f.severity} />
-                </span>
-                <span className="flex items-center justify-end gap-2">
-                  {isBreached(f, project, now) ? (
-                    <span className="border border-[var(--bad)] px-1.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--bad)]">
-                      past due
-                    </span>
-                  ) : null}
-                  <StatusChip status={f.status} />
-                </span>
-                <span className="text-right font-mono text-[10px] text-[var(--faint)]">{f.advisoryId}</span>
-              </Link>
-            ))}
           </div>
         )}
       </Panel>
