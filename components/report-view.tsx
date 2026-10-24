@@ -140,9 +140,9 @@ export function ReportView({
             security guarantee.
           </p>
         ) : (
-          <div className="grid grid-cols-2 gap-px bg-[var(--border)] sm:grid-cols-5">
+          <div className="flex flex-wrap gap-px border border-[var(--border)] bg-[var(--border)]">
             {openCounts.map(([sev, n]) => (
-              <div key={sev} className="bg-[var(--surface)] px-4 py-4 text-center">
+              <div key={sev} className="min-w-[120px] flex-1 bg-[var(--surface)] px-4 py-4 text-center">
                 <div className="font-display text-3xl font-semibold">{n}</div>
                 <div className="microlabel mt-1">{sev}</div>
               </div>

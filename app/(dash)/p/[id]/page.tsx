@@ -82,23 +82,29 @@ export default async function ProjectPage({
         </nav>
       </div>
 
-      <div className="grid gap-px border border-[var(--border)] bg-[var(--border)] sm:grid-cols-3">
-        <Stat label="Open now" value={String(openNow)} />
-        <Stat
-          label="SLA compliance"
-          value={sla.compliancePct === null ? "-" : `${sla.compliancePct}%`}
-          note={sla.breached > 0 ? `${sla.breached} past due` : "none past due"}
-          tone={sla.breached > 0 ? "bad" : undefined}
-        />
-        <Stat
-          label="Last import"
-          value={snapshots[0] ? snapshots[0].source.replace("_", " ") : "-"}
-          note={
-            snapshots[0]
-              ? `${snapshots[0].importedAt.toISOString().slice(0, 10)} - ${snapshots[0].findingCount} advisories`
-              : "no imports yet"
-          }
-        />
+      <div className="flex flex-wrap gap-px border border-[var(--border)] bg-[var(--border)]">
+        <div className="min-w-[180px] flex-1">
+          <Stat label="Open now" value={String(openNow)} />
+        </div>
+        <div className="min-w-[180px] flex-1">
+          <Stat
+            label="SLA compliance"
+            value={sla.compliancePct === null ? "-" : `${sla.compliancePct}%`}
+            note={sla.breached > 0 ? `${sla.breached} past due` : "none past due"}
+            tone={sla.breached > 0 ? "bad" : undefined}
+          />
+        </div>
+        <div className="min-w-[220px] flex-1">
+          <Stat
+            label="Last import"
+            value={snapshots[0] ? snapshots[0].source.replace("_", " ") : "-"}
+            note={
+              snapshots[0]
+                ? `${snapshots[0].importedAt.toISOString().slice(0, 10)} - ${snapshots[0].findingCount} advisories`
+                : "no imports yet"
+            }
+          />
+        </div>
       </div>
 
       <Panel title="Findings" index="R">

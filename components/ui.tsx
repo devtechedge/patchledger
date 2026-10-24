@@ -85,7 +85,7 @@ export function Stat({
   tone?: "bad";
 }) {
   return (
-    <div className="border border-[var(--border)] bg-[var(--surface)] px-5 py-4">
+    <div className="bg-[var(--surface)] px-5 py-4">
       <p className="microlabel">{label}</p>
       <p
         className="mt-2 font-display text-3xl font-semibold tracking-tight"
