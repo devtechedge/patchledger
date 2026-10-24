@@ -45,7 +45,7 @@ Not a scanner, not an audit, not a certification. It never implies a report prov
 | Language | TypeScript (strict) |
 | UI | React 19, Tailwind CSS 4 |
 | Database | PostgreSQL (Neon) via Prisma 7 + adapter-pg |
-| Tests | Vitest (37 tests), Playwright smoke |
+| Tests | Vitest unit suite, Playwright smoke + write-path e2e |
 
 ## Quick start
 

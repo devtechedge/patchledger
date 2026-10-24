@@ -18,7 +18,9 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "npx next dev -p 3000",
+    // CI: e2e validates the production build artifact (built by an earlier CI
+    // step). Locally: dev server with reuse for quick iterations.
+    command: process.env.CI ? "npx next start -p 3000" : "npx next dev -p 3000",
     url: "http://localhost:3000",
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
