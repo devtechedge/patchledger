@@ -319,7 +319,7 @@ describe("password reset", () => {
     await createAccount({ email, password: "oldPassw0rd1", name: "R" });
 
     // unknown email: no token, no signal
-    let sent: { to: string; body: string }[] = [];
+    const sent: { to: string; body: string }[] = [];
     const capture = (): Mailer => ({
       send: async (to, _s, body) => {
         sent.push({ to, body });
