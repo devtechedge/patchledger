@@ -1,8 +1,13 @@
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import { parseNpmAudit } from "../lib/importers/npm-audit";
 import { parseOsvScanner } from "../lib/importers/osv-scanner";
 import { parseScannerJson } from "../lib/importers/detect";
 import { ImportParseError } from "../lib/importers/types";
+
+const fixture = (name: string) =>
+  JSON.parse(readFileSync(path.join(import.meta.dirname, "fixtures", name), "utf8"));
 
 describe("npm audit parser", () => {
   const base = {
@@ -95,6 +100,38 @@ describe("npm audit parser", () => {
     expect(() => parseNpmAudit({ results: [] })).toThrow(ImportParseError);
     expect(() => parseNpmAudit([1, 2, 3])).toThrow(ImportParseError);
   });
+
+  it("parses a trimmed real npm audit v2 output end to end", () => {
+    const r = parseNpmAudit(fixture("npm-audit-fixture.json"));
+    // cascade-only entry ("cascaded" -> via ["got"]) is skipped; the two
+    // advisory-bearing entries produce exactly two findings
+    expect(r.findings).toHaveLength(2);
+    const minimist = r.findings.find((f) => f.packageName === "minimist")!;
+    expect(minimist.advisoryId).toBe("GHSA-vh95-rmgr-6w4m");
+    expect(minimist.severity).toBe("critical");
+    expect(minimist.fixAvailable).toBe(true);
+    expect(minimist.fixVersion).toBe("");
+    const got = r.findings.find((f) => f.packageName === "got")!;
+    // the via entry says moderate but the entry says high; via wins
+    expect(got.severity).toBe("medium");
+    expect(got.fixIsSemverMajor).toBe(true);
+    expect(got.fixVersion).toBe("12.0.0");
+    expect(r.stats.dependencies).toBe(15);
+    expect(r.findings.some((f) => f.packageName === "cascaded")).toBe(false);
+  });
+
+  it("pins advisory id casing: ids pass through exactly as the scanner reported them", () => {
+    const r = parseNpmAudit({
+      vulnerabilities: {
+        x: {
+          severity: "high",
+          isDirect: true,
+          via: [{ title: "t", range: "<1", vulnerability: "ghsa-lowercase-1234" }],
+        },
+      },
+    });
+    expect(r.findings[0].advisoryId).toBe("ghsa-lowercase-1234");
+  });
 });
 
 describe("osv-scanner parser", () => {
@@ -176,6 +213,42 @@ describe("osv-scanner parser", () => {
       ],
     });
     expect(r.findings.map((f) => f.ecosystem).sort()).toEqual(["crates", "pypi"]);
+  });
+
+  it("parses a trimmed real osv-scanner v2 output: dedupe, CVSS numeric-free vector, missing version, unfixed advisory", () => {
+    const r = parseOsvScanner(fixture("osv-scanner-fixture.json"));
+    // axios reported through two lockfiles dedupes to one finding
+    const axios = r.findings.filter((f) => f.packageName === "axios");
+    expect(axios).toHaveLength(1);
+    expect(axios[0].installedVersion).toBe("1.6.1");
+    // AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N scores 7.5 -> high
+    expect(axios[0].severity).toBe("high");
+    expect(axios[0].fixVersion).toBe("1.8.2");
+    const nofix = r.findings.find((f) => f.packageName === "nofix")!;
+    expect(nofix.fixAvailable).toBe(false);
+    const py = r.findings.find((f) => f.ecosystem === "pypi")!;
+    expect(py.advisoryId).toBe("PYSEC-2024-01");
+  });
+
+  it("accepts a numeric CVSS score in the severity array", () => {
+    const r = parseOsvScanner({
+      results: [
+        osvResult("/a", [
+          {
+            id: "CVE-2026-9999",
+            severity: [{ type: "CVSS_V3", score: 9.8 }],
+          },
+        ]),
+      ],
+    });
+    expect(r.findings[0].severity).toBe("critical");
+  });
+
+  it("handles a package entry with no version at all", () => {
+    const r = parseOsvScanner({
+      results: [osvResult("/a", [{ id: "GHSA-noversion" }], { name: "pkg", ecosystem: "npm" })],
+    });
+    expect(r.findings[0].installedVersion).toBe("");
   });
 });
 

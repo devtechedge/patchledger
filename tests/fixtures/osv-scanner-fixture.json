@@ -1,0 +1,42 @@
+{
+  "results": [
+    {
+      "source": { "type": "lockfile", "path": "/repo/app/package-lock.json" },
+      "packages": [
+        {
+          "package": { "name": "axios", "ecosystem": "npm", "version": "1.6.1" },
+          "vulnerabilities": [
+            {
+              "id": "GHSA-wf5p-g6vw-rhxx",
+              "summary": "Server-Side Request Forgery in axios",
+              "severity": [{ "type": "CVSS_V3", "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N" }],
+              "affected": [
+                {
+                  "package": { "name": "axios", "ecosystem": "npm" },
+                  "ranges": [{ "type": "SEMVER", "events": [{ "introduced": "0" }, { "fixed": "1.8.2" }] }]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "package": { "name": "nofix", "ecosystem": "npm" },
+          "vulnerabilities": [{ "id": "GHSA-nofix-0000", "summary": "No fixed version yet" }]
+        }
+      ]
+    },
+    {
+      "source": { "type": "lockfile", "path": "/repo/other/package-lock.json" },
+      "packages": [
+        {
+          "package": { "name": "axios", "ecosystem": "npm", "version": "1.6.1" },
+          "vulnerabilities": [{ "id": "GHSA-wf5p-g6vw-rhxx", "summary": "Server-Side Request Forgery in axios" }]
+        },
+        {
+          "package": { "name": "flask-cors", "ecosystem": "PyPI" },
+          "vulnerabilities": [{ "id": "PYSEC-2024-01", "summary": "CORS misflask" }]
+        }
+      ]
+    }
+  ]
+}

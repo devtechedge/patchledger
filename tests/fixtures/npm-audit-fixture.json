@@ -1,0 +1,55 @@
+{
+  "auditReportVersion": 2,
+  "vulnerabilities": {
+    "minimist": {
+      "name": "minimist",
+      "severity": "critical",
+      "isDirect": true,
+      "via": [
+        {
+          "source": 1100568,
+          "name": "minimist",
+          "title": "Prototype Pollution in minimist",
+          "url": "https://github.com/advisories/GHSA-vh95-rmgr-6w4m",
+          "severity": "critical",
+          "range": "<1.2.6",
+          "vulnerability": "GHSA-vh95-rmgr-6w4m"
+        }
+      ],
+      "range": "<1.2.6",
+      "nodes": ["node_modules/minimist"],
+      "fixAvailable": true
+    },
+    "got": {
+      "name": "got",
+      "severity": "high",
+      "isDirect": false,
+      "via": [
+        {
+          "source": 1100600,
+          "name": "got",
+          "title": "Got allows a redirect to a UNIX socket",
+          "url": "https://github.com/advisories/GHSA-pfrx-2q88-qq97",
+          "severity": "moderate",
+          "range": "<11.8.5",
+          "vulnerability": "GHSA-pfrx-2q88-qq97"
+        }
+      ],
+      "range": "<11.8.5",
+      "nodes": ["node_modules/got"],
+      "fixAvailable": { "name": "got", "version": "12.0.0", "isSemVerMajor": true }
+    },
+    "cascaded": {
+      "name": "cascaded",
+      "severity": "high",
+      "isDirect": false,
+      "via": ["got"],
+      "range": "*",
+      "nodes": ["node_modules/cascaded"]
+    }
+  },
+  "metadata": {
+    "vulnerabilities": { "info": 0, "low": 0, "moderate": 0, "high": 2, "critical": 1, "total": 3 },
+    "dependencies": { "prod": 10, "dev": 5, "optional": 0, "peer": 0, "peerOptional": 0, "total": 15 }
+  }
+}
