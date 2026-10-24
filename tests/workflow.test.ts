@@ -1,11 +1,13 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { randomBytes } from "node:crypto";
+import { createHash, randomBytes } from "node:crypto";
 import { prisma } from "../lib/db";
 import { rateLimit } from "../lib/rateLimit";
+import type { Mailer } from "../lib/mailer";
 import {
   InputError,
   NotFoundError,
   authenticate,
+  countWaitlist,
   createAccount,
   createProject,
   createReport,
@@ -14,9 +16,13 @@ import {
   getProject,
   getReportByPublicId,
   importScan,
+  isResetTokenValid,
+  joinWaitlist,
   listAuditEvents,
   listFindings,
   listProjects,
+  requestPasswordReset,
+  resetPassword,
   revokeReport,
   transitionFinding,
   updateProjectSettings,
@@ -304,6 +310,69 @@ describe("tenant isolation", () => {
     ).rejects.toThrow(NotFoundError);
     // intruder's own dashboard sees only their projects
     expect(await listProjects(intruder.id)).toHaveLength(0);
+  });
+});
+
+describe("password reset", () => {
+  it("runs the full single-use flow and never reveals unknown emails", async () => {
+    const email = `rst-${randomBytes(4).toString("hex")}@example.test`;
+    await createAccount({ email, password: "oldPassw0rd1", name: "R" });
+
+    // unknown email: no token, no signal
+    let sent: { to: string; body: string }[] = [];
+    const capture = (): Mailer => ({
+      send: async (to, _s, body) => {
+        sent.push({ to, body });
+      },
+    });
+    await requestPasswordReset(`nobody-${randomBytes(2).toString("hex")}@example.test`, { ip: "1.2.3.4", mailer: capture() });
+    expect(sent).toHaveLength(0);
+
+    // known email: a link is dispatched
+    await requestPasswordReset(email, { ip: "1.2.3.4", mailer: capture() });
+    expect(sent).toHaveLength(1);
+    expect(sent[0].to).toBe(email);
+    const raw = /\/reset\/([a-f0-9]{64})/.exec(sent[0].body)![1];
+
+    // token validates before use
+    expect(await isResetTokenValid(raw)).toBe(true);
+
+    // reset rotates the password and kills sessions
+    const acc = await prisma.account.findUniqueOrThrow({ where: { email } });
+    await prisma.session.create({ data: { id: "dead".repeat(16), accountId: acc.id, expiresAt: new Date(Date.now() + 86_400_000) } });
+    await resetPassword(raw, "newPassw0rd2", { ip: "1.2.3.4" });
+    expect(await authenticate(email, "newPassw0rd2")).toBeTruthy();
+    expect(await authenticate(email, "oldPassw0rd1")).toBeNull();
+    expect(await prisma.session.count({ where: { accountId: acc.id } })).toBe(0);
+    expect(await isResetTokenValid(raw)).toBe(false);
+
+    // reuse is rejected
+    await expect(resetPassword(raw, "againPassw0rd3", { ip: "1.2.3.4" })).rejects.toThrow(InputError);
+
+    // malformed and expired tokens are rejected
+    await expect(resetPassword("deadbeef", "whateverPassw0rd1", { ip: "1.2.3.4" })).rejects.toThrow(InputError);
+    const expired = await prisma.passwordResetToken.create({
+      data: {
+        accountId: acc.id,
+        tokenHash: createHash("sha256").update("a".repeat(64)).digest("hex"),
+        expiresAt: new Date(Date.now() - 1000),
+      },
+    });
+    expect(await isResetTokenValid("a".repeat(64))).toBe(false);
+    await expect(resetPassword("a".repeat(64), "whateverPassw0rd1", { ip: "1.2.3.4" })).rejects.toThrow(InputError);
+    void expired;
+  });
+});
+
+describe("waitlist", () => {
+  it("dedupes by email and counts entries", async () => {
+    const email = `wl-${randomBytes(4).toString("hex")}@example.test`;
+    await joinWaitlist(email, "landing");
+    await joinWaitlist(email, "landing"); // duplicate resolves silently
+    const total = await countWaitlist();
+    expect(total).toBeGreaterThanOrEqual(1);
+    const rows = await prisma.waitlistEntry.findMany({ where: { email } });
+    expect(rows).toHaveLength(1);
   });
 });
 

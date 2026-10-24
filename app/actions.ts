@@ -5,7 +5,13 @@ import { redirect } from "next/navigation";
 import { createSession, currentAccount, destroySession } from "@/lib/auth";
 import { isPasswordStrong } from "@/lib/password";
 import { audit } from "@/lib/audit";
-import { authenticate, createAccount } from "@/lib/services";
+import {
+  authenticate,
+  createAccount,
+  joinWaitlist,
+  requestPasswordReset,
+  resetPassword,
+} from "@/lib/services";
 import { LIMITS, rateLimit } from "@/lib/rateLimit";
 import { InputError, optionalString, requireString, validEmail } from "@/lib/validation";
 
@@ -85,4 +91,60 @@ export async function logoutAction(): Promise<void> {
   }
   await destroySession();
   redirect("/login");
+}
+
+export interface NeutralState {
+  done?: boolean;
+  error?: string;
+}
+
+export async function requestResetAction(
+  _prev: NeutralState,
+  formData: FormData
+): Promise<NeutralState> {
+  try {
+    const ip = await clientIp();
+    const email = validEmail(requireString(formData.get("email"), "email", { label: "Email", max: 254 }));
+    await requestPasswordReset(email, { ip });
+    // identical response whether or not the account exists (no enumeration)
+    return { done: true };
+  } catch (e) {
+    if (e instanceof InputError) return { error: e.message };
+    throw e;
+  }
+}
+
+export async function resetPasswordAction(
+  _prev: NeutralState,
+  formData: FormData
+): Promise<NeutralState> {
+  try {
+    const ip = await clientIp();
+    const token = requireString(formData.get("token"), "token", { label: "Token", max: 64 });
+    const password = requireString(formData.get("password"), "password", { label: "Password", max: 200 });
+    const confirm = requireString(formData.get("confirm"), "confirm", { label: "Confirmation", max: 200 });
+    if (password !== confirm) return { error: "Passwords do not match." };
+    await resetPassword(token, password, { ip });
+    return { done: true };
+  } catch (e) {
+    if (e instanceof InputError) return { error: e.message };
+    throw e;
+  }
+}
+
+export async function waitlistAction(
+  _prev: NeutralState,
+  formData: FormData
+): Promise<NeutralState> {
+  try {
+    const ip = await clientIp();
+    const rl = await rateLimit(`waitlist:${ip}`, "waitlist", 5, 3_600_000);
+    if (!rl.allowed) return { done: true }; // neutral on flood too
+    const email = validEmail(requireString(formData.get("email"), "email", { label: "Email", max: 254 }));
+    await joinWaitlist(email, optionalString(formData.get("source"), 40) || "landing");
+    return { done: true };
+  } catch (e) {
+    if (e instanceof InputError) return { error: e.message };
+    throw e;
+  }
 }

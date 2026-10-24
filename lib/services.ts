@@ -1,6 +1,9 @@
-import { hashPassword, verifyPassword } from "./password";
+import { createHash, randomBytes } from "node:crypto";
+import { hashPassword, isPasswordStrong, verifyPassword } from "./password";
 import { prisma } from "./db";
 import { audit } from "./audit";
+import { mailer, type Mailer } from "./mailer";
+import { rateLimit } from "./rateLimit";
 import { newPublicId } from "./ids";
 import { NotFoundError, applyImport } from "./merge";
 import { parseScannerJson, ImportParseError } from "./importers/detect";
@@ -436,6 +439,105 @@ export async function listFindings(accountId: string, projectId: string, filters
     if (d !== 0) return d;
     return b.firstSeenAt.getTime() - a.firstSeenAt.getTime();
   });
+}
+
+// ---------------------------------------------------------------------------
+// password reset
+// ---------------------------------------------------------------------------
+
+const RESET_TTL_MS = 15 * 60 * 1000;
+
+export interface ResetRequestOutcome {
+  /** Present only when the account exists AND the console mailer is in use
+   * (dev/test). Never returned in production responses. */
+  devToken?: string;
+}
+
+export async function requestPasswordReset(
+  email: string,
+  opts: { ip: string; mailer?: Mailer }
+): Promise<void> {
+  const rlEmail = await rateLimit(`reset:${email.toLowerCase()}`, "reset", 5, 3_600_000);
+  const rlIp = await rateLimit(`reset:ip:${opts.ip}`, "reset", 20, 3_600_000);
+  if (!rlEmail.allowed || !rlIp.allowed) return; // silently swallow: no enumeration signal
+
+  const account = await prisma.account.findUnique({ where: { email: email.toLowerCase() } });
+  if (!account) return; // neutral: identical behaviour to the known-email path
+
+  const raw = randomBytes(32).toString("hex");
+  await prisma.passwordResetToken.create({
+    data: {
+      accountId: account.id,
+      tokenHash: createHash("sha256").update(raw).digest("hex"),
+      expiresAt: new Date(Date.now() + RESET_TTL_MS),
+    },
+  });
+  const base = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  const chosen = opts.mailer ?? mailer;
+  await chosen.send(
+    account.email,
+    "Reset your PatchLedger password",
+    `Use this link within 15 minutes to choose a new password:\n\n${base}/reset/${raw}\n\nIf you did not request this, ignore this email - the link expires on its own.`
+  );
+  await audit(account.id, "password_reset_requested", { meta: { ip: opts.ip } });
+}
+
+export async function isResetTokenValid(token: string): Promise<boolean> {
+  if (!/^[a-f0-9]{64}$/.test(token)) return false;
+  const row = await prisma.passwordResetToken.findUnique({
+    where: { tokenHash: createHash("sha256").update(token).digest("hex") },
+  });
+  return !!row && !row.usedAt && row.expiresAt > new Date();
+}
+
+/** Single-use reset: rotates the password, burns the token, kills all sessions. */
+export async function resetPassword(
+  token: string,
+  newPassword: string,
+  opts: { ip: string }
+): Promise<void> {
+  const rl = await rateLimit(`resetuse:${opts.ip}`, "reset", 20, 3_600_000);
+  if (!rl.allowed) throw new InputError("Too many attempts. Wait a few minutes.");
+  if (!isPasswordStrong(newPassword)) {
+    throw new InputError("Password must be at least 10 characters and include a letter and a number.");
+  }
+  if (!/^[a-f0-9]{64}$/.test(token)) throw new InputError("This reset link is invalid or has expired.");
+
+  const tokenHash = createHash("sha256").update(token).digest("hex");
+  const row = await prisma.passwordResetToken.findUnique({ where: { tokenHash } });
+  if (!row || row.usedAt || row.expiresAt <= new Date()) {
+    throw new InputError("This reset link is invalid or has expired.");
+  }
+
+  await prisma.$transaction([
+    prisma.account.update({
+      where: { id: row.accountId },
+      data: { passwordHash: await hashPassword(newPassword) },
+    }),
+    prisma.passwordResetToken.update({ where: { id: row.id }, data: { usedAt: new Date() } }),
+    prisma.passwordResetToken.deleteMany({
+      where: { accountId: row.accountId, usedAt: null, id: { not: row.id } },
+    }),
+    prisma.session.deleteMany({ where: { accountId: row.accountId } }),
+  ]);
+  await audit(row.accountId, "password_reset", { meta: { ip: opts.ip } });
+}
+
+// ---------------------------------------------------------------------------
+// waitlist
+// ---------------------------------------------------------------------------
+
+export async function joinWaitlist(email: string, source: string): Promise<void> {
+  // dedupe by email; duplicates resolve to the same neutral success upstream
+  await prisma.waitlistEntry.upsert({
+    where: { email: email.toLowerCase() },
+    create: { email: email.toLowerCase(), source },
+    update: {},
+  });
+}
+
+export async function countWaitlist(): Promise<number> {
+  return prisma.waitlistEntry.count();
 }
 
 // ---------------------------------------------------------------------------

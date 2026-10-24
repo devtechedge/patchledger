@@ -22,6 +22,7 @@ model Account {
   createdAt    DateTime  @default(now())
   sessions     Session[]
   projects     Project[]
+  resetTokens  PasswordResetToken[]
 
   @@index([email])
 }
@@ -170,4 +171,26 @@ model RateLimit {
   createdAt DateTime @default(now())
 
   @@index([bucket, action, createdAt])
+}
+
+// Single-use, 15-minute password reset tokens. Only the SHA-256 of the token
+// is stored; the raw token exists solely in the emailed link.
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  accountId String
+  account   Account   @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([accountId])
+}
+
+// Pilot demand capture from the landing page. Deduped by email.
+model WaitlistEntry {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  source    String   @default("landing")
+  createdAt DateTime @default(now())
 }

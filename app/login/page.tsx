@@ -29,6 +29,10 @@ export default function LoginPage() {
           <Link href="/signup" className="font-semibold text-[var(--accent)] hover:underline">
             Create one
           </Link>
+          <span className="mx-2 text-[var(--faint)]">-</span>
+          <Link href="/forgot-password" className="text-[var(--muted)] hover:text-[var(--ink)]">
+            Forgot password?
+          </Link>
         </p>
         <p className="mt-6 text-center font-mono text-xs text-[var(--faint)]">
           demo@patchledger.test / demo-password-1
