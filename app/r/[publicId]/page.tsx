@@ -6,6 +6,7 @@ import { LIMITS, rateLimit } from "@/lib/rateLimit";
 import type { ReportBranding } from "@/components/report-view";
 import { ReportView } from "@/components/report-view";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { PrintButton } from "@/components/print-button";
 import type { ReportSummary } from "@/lib/report";
 
 export const dynamic = "force-dynamic";
@@ -76,9 +77,13 @@ export default async function PublicReportPage({
             shared record - unlisted link
           </span>
           <div className="flex items-center gap-3">
-            <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--faint)]">
-              generated {report.createdAt.toISOString().slice(0, 10)}
-            </span>
+            <a
+              href={`/r/${publicId}/export`}
+              className="border border-[var(--border-strong)] px-3 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--ink)] hover:border-[var(--accent)] hover:text-[var(--accent)]"
+            >
+              CSV
+            </a>
+            <PrintButton />
             <ThemeToggle />
           </div>
         </div>
