@@ -49,7 +49,9 @@ test("demo write path: transition, report generate, revoke", async ({ page }) =>
   await expect(page.getByText('Status updated to "open"')).toBeVisible();
   await expect(page.getByText("open → in_progress").first()).toBeVisible();
 
-  // report generation from the reports page
+  // back to the project page for report generation
+  await page.getByRole("link", { name: /Northwind Portal/ }).click();
+  await page.waitForURL("**/p/**");
   await page.getByRole("link", { name: "Reports", exact: true }).click();
   await page.waitForURL("**/reports");
   await page.getByRole("button", { name: "Generate client report" }).click();
