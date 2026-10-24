@@ -1,25 +1,24 @@
 # Next Actions
 
-Updated: 2026-10-24 (session 1 end + deploy session). Live: https://patchledger.vercel.app, repo https://github.com/devtechedge/patchledger (git auto-deploy from main, verified).
+Updated: 2026-10-24 (hardening pass done). Live: https://patchledger.vercel.app, repo https://github.com/devtechedge/patchledger (git auto-deploy from main, CI green).
 
-## Closed this session (2026-10-24, Dev approved)
+## Hardening pass 2026-10-24 (executed from the QA/PM/EM brief)
 
-2. Deploy to Vercel - DONE: project `patchledger` (team devtechedge1), env vars set as Secrets (DATABASE_URL pooled, SESSION_PEPPER matching the seeded demo, NEXT_PUBLIC_SITE_URL), prod smoke verified (health/db-up, landing + sample link, dashboard 307, report 200, bad id 404).
-3. GitHub repo - DONE: public devtechedge/patchledger, history secret-scanned before push (clean), 5 + deploy commits.
-4. Name check - BEST-EFFORT DONE: no USPTO web-indexed hits for "PatchLedger"; patchledger.com registered; .io/.app/.dev free (RDAP 2026-10-24). Proper trademark clearance (TESS/EUIPO/UKIPO) still open before paid marketing. Domain purchase needs approval (costs money).
-5. Lemon Squeezy verification - DONE (official docs 2026-10-24): fees 5% + 50c/txn, $0/mo, MoR handles global VAT/sales-tax liability. India: bank payouts require Stripe pre-approval (Stripe India is invite-only for new accounts since May 2024 - LS docs state this exactly); PayPal payouts are the supported route for India (200+ countries; PayPal confirms INR receive/withdraw). Conclusion: Lemon Squeezy via PayPal payouts is usable; checkout not built yet (no customers).
+Fixed (all verified in CI against the production build): mobile overflow (tables scrollable, e2e guard at 375px), agency branding color rendered on reports, share-link rate limit (120/h/IP), OG/Twitter metadata + dynamic per-report share cards, robots.txt + sitemap, branded 404/error pages, security headers, authenticated write-path e2e incl. report revoke, password reset (single-use 15-min hashed tokens, neutral no-enumeration flow, console mailer), landing waitlist capture + Vercel Analytics, report print button + CSV export, dashboard loading skeletons, AA contrast tokens + focus-visible, CI e2e now runs against `next start`, Node 22 pinned (.nvmrc + engines), parser fixtures + edge tests, CONTRIBUTING.md, a11y (aria-current, table roles).
+Production-only bugs found and fixed by this pass: mutating server actions lacked revalidatePath (stale server-rendered UI in prod builds); dashboard pages asserted a non-null session while the layout redirect runs in parallel (TypeError race on `next start`).
 
-## Awaiting Dev (blocking validation)
+## Open gates (need Dev)
 
-1. Outreach batch #1 (25-40 personalized messages + 1 community post) - APPROVED 2026-10-24 but not sent: sending must come from Dev's mailbox (interview script + message skeleton in docs/outreach/). Next session: build the prospect list from public sources (PROSPECT_CRITERIA.md) and draft the personalized batch for Dev to send.
-6. Custom domain purchase (patchledger.io or .app) - needs approval; .com is taken.
+1. Email provider choice for password-reset delivery (console transport logs links server-side only until a provider is picked; consider Resend/Postmark - decision + approval needed).
+2. Outreach batch #1 - approved but unsent; prospect list + personalized drafts next.
+3. Custom domain (patchledger.com taken; .io/.app/.dev free) - purchase is Dev's call.
+4. Social preview upload at repo Settings -> General (no API) - docs/screenshots/social-preview.png is committed.
+5. GTM docs (IDEA_SCORECARD, outreach/, EXPERIMENTS) are public in a public repo - consider a private mirror or trimming outreach/ from the public repo (Dev's call; not moved unilaterally).
+6. Waitlist entries: query directly via DB (no admin UI by design); first signal check after the community post goes out.
 
 ## Product next slices (after validation signals, in order)
 
-1. Dependabot alerts JSON + GitHub Advisory export intake (bigger surface than npm audit CLI).
-2. pip-audit / cargo audit intake (osv-scanner already covers multi-ecosystem; verify demand first).
-3. CSV/JSON export of findings + evidence (clients ask for machine-readable evidence).
-4. Multi-user teams (today: single account per agency).
-5. Email delivery of reports on a schedule (needs an email provider decision).
-6. Lemon Squeezy checkout + webhook once a pilot asks to pay.
-7. Manual leftover (only human step, no API): upload docs/screenshots/social-preview.png (already committed, 1280x640, under 1 MB) at GitHub repo Settings -> General -> Social preview. Verify afterwards that og:image on the repo page starts with repository-images.githubusercontent.com.
+1. Dependabot alerts JSON + GitHub Advisory export intake.
+2. Teams (multi-user per agency).
+3. Email delivery of reports on a schedule (needs the email provider).
+4. Lemon Squeezy checkout + webhook once a pilot asks to pay (verified path: LS MoR, PayPal payouts for India).
