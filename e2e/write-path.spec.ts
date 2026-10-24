@@ -33,8 +33,17 @@ test("demo write path: transition, report generate, revoke", async ({ page }) =>
   await page.waitForURL("**/f/**");
   await expect(page.getByText("Status history")).toBeVisible();
 
-  // transition open -> in_progress -> open (reverted)
-  await page.getByRole("button", { name: "Start work" }).click();
+  // normalize state from any previous interrupted run: whatever the status,
+  // land it on open, then do one full open -> in_progress -> open cycle
+  const backToOpen = page.getByRole("button", { name: "Back to open" });
+  const startWork = page.getByRole("button", { name: "Start work" });
+  if (await backToOpen.isVisible()) {
+    await backToOpen.click();
+    await expect(page.getByText('Status updated to "open"')).toBeVisible();
+  } else {
+    await expect(startWork).toBeVisible();
+  }
+  await startWork.click();
   await expect(page.getByText('Status updated to "in_progress"')).toBeVisible();
   await page.getByRole("button", { name: "Back to open" }).click();
   await expect(page.getByText('Status updated to "open"')).toBeVisible();

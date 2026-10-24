@@ -613,13 +613,19 @@ export async function listReports(accountId: string, projectId: string) {
   });
 }
 
-export async function revokeReport(accountId: string, reportId: string): Promise<void> {
+export async function revokeReport(accountId: string, reportId: string): Promise<string> {
+  const report = await prisma.report.findFirst({
+    where: { id: reportId, accountId },
+    select: { projectId: true },
+  });
+  if (!report) throw new NotFoundError();
   const res = await prisma.report.updateMany({
     where: { id: reportId, accountId, status: "published" },
     data: { status: "revoked", revokedAt: new Date() },
   });
   if (res.count === 0) throw new NotFoundError();
   await audit(accountId, "report_revoke", { targetType: "report", targetId: reportId });
+  return report.projectId;
 }
 
 export async function getReportByPublicId(publicId: string) {

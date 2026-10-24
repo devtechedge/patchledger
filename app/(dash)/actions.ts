@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { currentAccount, destroySession } from "@/lib/auth";
 import { LIMITS, rateLimit } from "@/lib/rateLimit";
@@ -69,6 +70,7 @@ export async function importScanAction(
     }
     const raw = parseJsonInput(formData.get("scannerJson"));
     const outcome = await importScan(account.id, projectId, raw, label);
+    revalidatePath(`/p/${projectId}`, "page");
     const parts = [
       `${outcome.total} findings from ${outcome.source}`,
       `${outcome.created} new`,
@@ -90,6 +92,7 @@ export async function transitionAction(
   try {
     const account = await requireAccount();
     const findingId = requireString(formData.get("findingId"), "findingId");
+    const projectId = requireString(formData.get("projectId"), "projectId");
     const toStatus = requireString(formData.get("toStatus"), "toStatus") as FindingStatus;
     await transitionFinding(account.id, findingId, {
       toStatus,
@@ -101,6 +104,9 @@ export async function transitionAction(
       verifyUrl: validUrlOrNull(formData.get("verifyUrl")),
       verifyNote: optionalString(formData.get("verifyNote"), 2000) || null,
     });
+    // the finding page and project list render status server-side
+    revalidatePath(`/p/${projectId}`, "page");
+    revalidatePath(`/p/${projectId}/f/${findingId}`, "page");
     return { ok: `Status updated to "${toStatus}".` };
   } catch (e) {
     if (e instanceof InputError) return { error: e.message };
@@ -124,6 +130,7 @@ export async function generateReportAction(
       periodLabel: optionalString(formData.get("periodLabel"), 80),
       agencyNote: optionalString(formData.get("agencyNote"), 1000),
     });
+    revalidatePath(`/p/${projectId}/reports`, "page");
     return { ok: "Report generated.", link: `/r/${report.publicId}` };
   } catch (e) {
     if (e instanceof InputError) return { error: e.message };
@@ -134,7 +141,8 @@ export async function generateReportAction(
 export async function revokeReportAction(formData: FormData): Promise<void> {
   const account = await requireAccount();
   const reportId = requireString(formData.get("reportId"), "reportId");
-  await revokeReport(account.id, reportId);
+  const projectId = await revokeReport(account.id, reportId);
+  revalidatePath(`/p/${projectId}/reports`, "page");
 }
 
 export async function updateSettingsAction(
@@ -152,6 +160,8 @@ export async function updateSettingsAction(
       slaHighDays: validSlaDays(formData.get("slaHighDays")),
       slaMediumDays: validSlaDays(formData.get("slaMediumDays")),
     });
+    revalidatePath(`/p/${projectId}`, "page");
+    revalidatePath(`/p/${projectId}/settings`, "page");
     return { ok: "Settings saved." };
   } catch (e) {
     if (e instanceof InputError) return { error: e.message };
@@ -171,6 +181,7 @@ export async function updateAccountAction(
       contactEmail: optionalString(formData.get("contactEmail"), 254) || null,
       accentColor: validHexColor(formData.get("accentColor")),
     });
+    revalidatePath("/account", "page");
     return { ok: "Account updated." };
   } catch (e) {
     if (e instanceof InputError) return { error: e.message };
