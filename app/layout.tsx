@@ -20,9 +20,22 @@ const plexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://patchledger.vercel.app"),
   title: "PatchLedger - Prove your security maintenance",
   description:
     "Turn npm audit and osv-scanner output into a tracked, evidence-backed remediation record with SLA status and client-ready reports. No repo access, no scanning, no code leaving your machine.",
+  openGraph: {
+    title: "PatchLedger - Prove your security maintenance",
+    description:
+      "Scanner output in. An evidence-backed record out: fixes, verification runs, SLA status and branded client reports.",
+    type: "website",
+    siteName: "PatchLedger",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "PatchLedger - Prove your security maintenance",
+    description: "Evidence-backed security maintenance records for client projects.",
+  },
   icons: { icon: "/favicon.svg" },
 };
 
