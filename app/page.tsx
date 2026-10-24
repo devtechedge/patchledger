@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { PLANS } from "@/lib/plans";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { WaitlistForm } from "@/components/forms";
 
 export const dynamic = "force-dynamic";
 
@@ -228,6 +229,15 @@ export default async function LandingPage() {
             <p className="mt-4 font-mono text-xs text-[var(--faint)]">
               billing disabled during pilot - free until then
             </p>
+            <div className="mt-6 border border-[var(--border)] bg-[var(--surface)] p-5">
+              <p className="microlabel">Not ready to sign up?</p>
+              <p className="mt-2 text-sm text-[var(--muted)]">
+                Leave your email and we will reach out when the pilot opens for new agencies.
+              </p>
+              <div className="mt-3">
+                <WaitlistForm />
+              </div>
+            </div>
           </div>
         </section>
       </main>
