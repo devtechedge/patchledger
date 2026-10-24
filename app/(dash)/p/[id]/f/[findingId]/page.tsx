@@ -8,6 +8,15 @@ import { TransitionForms } from "@/components/dashboard-forms";
 
 export const metadata = { title: "Finding - PatchLedger" };
 
+function Record({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section className="border border-[var(--border)] bg-[var(--surface)]">
+      <h2 className="border-b border-[var(--border)] px-5 py-3 microlabel">{title}</h2>
+      <div className="px-5 py-4 text-sm">{children}</div>
+    </section>
+  );
+}
+
 export default async function FindingPage({
   params,
 }: PageProps<"/p/[id]/f/[findingId]">) {
@@ -30,34 +39,31 @@ export default async function FindingPage({
       <div>
         <Link
           href={`/p/${finding.project.id}`}
-          className="text-sm text-[var(--muted)] hover:text-[var(--ink)]"
+          className="font-mono text-xs uppercase tracking-[0.14em] text-[var(--muted)] hover:text-[var(--accent)]"
         >
           &larr; {finding.project.name}
         </Link>
-        <div className="mt-2 flex flex-wrap items-center gap-2">
-          <h1 className="text-2xl font-bold tracking-tight">{finding.packageName}</h1>
+        <div className="mt-3 flex flex-wrap items-center gap-3">
+          <h1 className="font-display text-2xl font-semibold tracking-tight">{finding.packageName}</h1>
+          {finding.installedVersion ? (
+            <span className="font-mono text-xs text-[var(--faint)]">@{finding.installedVersion}</span>
+          ) : null}
           <SeverityChip severity={finding.severity} />
           <StatusChip status={finding.status} />
           {breached ? (
-            <span
-              className="rounded-full border px-2 py-0.5 text-xs font-semibold"
-              style={{ borderColor: "var(--bad)", color: "var(--bad)" }}
-            >
-              SLA past due ({daysOpen(finding, now)} days open)
+            <span className="border border-[var(--bad)] px-1.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--bad)]">
+              past due - {daysOpen(finding, now)}d open
             </span>
           ) : null}
         </div>
-        <p className="mt-1 max-w-2xl text-sm text-[var(--muted)]">{finding.title}</p>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--muted)]">{finding.title}</p>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <div className="grid gap-4">
-          <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 text-sm">
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-[var(--faint)]">
-              Advisory
-            </h2>
-            <dl className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-2">
-              <dt className="text-[var(--faint)]">Advisory</dt>
+        <div className="grid gap-5">
+          <Record title="Advisory record">
+            <dl className="grid grid-cols-[120px_1fr] gap-x-5 gap-y-2.5">
+              <dt className="microlabel">id</dt>
               <dd className="font-mono text-xs">
                 {finding.advisoryId}
                 {finding.advisoryUrl ? (
@@ -69,83 +75,85 @@ export default async function FindingPage({
                   </>
                 ) : null}
               </dd>
-              <dt className="text-[var(--faint)]">Ecosystem</dt>
-              <dd>{finding.ecosystem}</dd>
+              <dt className="microlabel">ecosystem</dt>
+              <dd className="font-mono text-xs">{finding.ecosystem}</dd>
               {finding.installedVersion ? (
                 <>
-                  <dt className="text-[var(--faint)]">Installed</dt>
+                  <dt className="microlabel">installed</dt>
                   <dd className="font-mono text-xs">{finding.installedVersion}</dd>
                 </>
               ) : null}
               {finding.vulnerableRange ? (
                 <>
-                  <dt className="text-[var(--faint)]">Range</dt>
+                  <dt className="microlabel">range</dt>
                   <dd className="font-mono text-xs">{finding.vulnerableRange}</dd>
                 </>
               ) : null}
-              <dt className="text-[var(--faint)]">Fix</dt>
-              <dd>
+              <dt className="microlabel">fix</dt>
+              <dd className="text-[var(--muted)]">
                 {finding.fixAvailable
                   ? `${finding.fixVersion || "available"}${finding.fixIsSemverMajor ? " (major bump - breaking-change risk)" : ""}`
                   : "none reported by scanner"}
               </dd>
-              <dt className="text-[var(--faint)]">First seen</dt>
-              <dd>{finding.firstSeenAt.toISOString().slice(0, 10)}</dd>
-              <dt className="text-[var(--faint)]">Sources</dt>
-              <dd>
+              <dt className="microlabel">first seen</dt>
+              <dd className="font-mono text-xs">{finding.firstSeenAt.toISOString().slice(0, 10)}</dd>
+              <dt className="microlabel">sources</dt>
+              <dd className="font-mono text-xs">
                 {finding.firstSource}
                 {finding.lastSource !== finding.firstSource ? ` -> ${finding.lastSource}` : ""}
               </dd>
             </dl>
             {finding.statusReason ? (
-              <p className="mt-4 rounded-lg bg-[var(--surface-2)] p-3 text-xs text-[var(--muted)]">
+              <p className="mt-4 border-l-2 border-[var(--border-strong)] bg-[var(--surface-2)] px-3 py-2 font-mono text-xs text-[var(--muted)]">
                 {finding.statusReason}
               </p>
             ) : null}
-          </section>
+          </Record>
 
-          <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 text-sm">
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-[var(--faint)]">
-              Recorded evidence
-            </h2>
+          <Record title="Evidence on file">
             {finding.fixUrl || finding.fixNote || finding.verifyUrl || finding.verifyNote ? (
               <ul className="grid gap-2 text-[var(--muted)]">
                 {finding.fixUrl ? (
                   <li>
-                    Fix reference:{" "}
+                    <span className="microlabel mr-2">fix ref</span>
                     <a href={finding.fixUrl} className="underline" style={{ color: "var(--accent)" }}>
                       {finding.fixUrl.slice(0, 80)}
                     </a>
                   </li>
                 ) : null}
-                {finding.fixNote ? <li>Fix note: {finding.fixNote}</li> : null}
-                {finding.fixedInVersion ? <li>Fixed in: {finding.fixedInVersion}</li> : null}
+                {finding.fixNote ? (
+                  <li><span className="microlabel mr-2">fix note</span>{finding.fixNote}</li>
+                ) : null}
+                {finding.fixedInVersion ? (
+                  <li><span className="microlabel mr-2">fixed in</span><span className="font-mono text-xs">{finding.fixedInVersion}</span></li>
+                ) : null}
                 {finding.verifyUrl ? (
                   <li>
-                    Verification ({finding.verifyType}):{" "}
+                    <span className="microlabel mr-2">verify ({finding.verifyType})</span>
                     <a href={finding.verifyUrl} className="underline" style={{ color: "var(--accent)" }}>
                       {finding.verifyUrl.slice(0, 80)}
                     </a>
                   </li>
                 ) : null}
-                {finding.verifyNote ? <li>Verification note: {finding.verifyNote}</li> : null}
+                {finding.verifyNote ? (
+                  <li><span className="microlabel mr-2">verify note</span>{finding.verifyNote}</li>
+                ) : null}
               </ul>
             ) : (
-              <p className="text-[var(--muted)]">No evidence recorded yet.</p>
+              <p className="font-mono text-xs text-[var(--faint)]">no evidence recorded yet</p>
             )}
-          </section>
+          </Record>
 
-          <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 text-sm">
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-[var(--faint)]">
-              History
-            </h2>
+          <Record title="Status history">
             {finding.events.length === 0 ? (
-              <p className="text-[var(--muted)]">No status changes yet.</p>
+              <p className="font-mono text-xs text-[var(--faint)]">no status changes yet</p>
             ) : (
               <ul className="grid gap-2">
                 {finding.events.map((e) => (
-                  <li key={e.id} className="text-xs text-[var(--muted)]">
-                    <span className="font-mono">{e.createdAt.toISOString().slice(0, 16).replace("T", " ")}</span>{" "}
+                  <li key={e.id} className="font-mono text-xs text-[var(--muted)]">
+                    <span className="text-[var(--faint)]">
+                      {e.createdAt.toISOString().slice(0, 16).replace("T", " ")}
+                    </span>{" "}
                     {e.fromStatus} &rarr; {e.toStatus}
                     {e.kind === "auto_import" ? " (auto)" : ""}
                     {e.note ? ` - ${e.note}` : ""}
@@ -153,13 +161,11 @@ export default async function FindingPage({
                 ))}
               </ul>
             )}
-          </section>
+          </Record>
         </div>
 
         <div>
-          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-[var(--faint)]">
-            Actions
-          </h2>
+          <h2 className="mb-3 microlabel">Actions</h2>
           <TransitionForms findingId={finding.id} projectId={finding.project.id} status={finding.status} />
         </div>
       </div>

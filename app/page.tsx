@@ -19,22 +19,57 @@ async function demoReportLink(): Promise<string | null> {
   return report ? `/r/${report.publicId}` : null;
 }
 
+const TERMINAL_ROWS = [
+  { pkg: "lodash.template", sev: "critical", rest: "GHSA-jf85-c6p8-p8pp", state: "VERIFIED", stateCls: "text-[var(--good)]" },
+  { pkg: "axios", sev: "medium", rest: "GHSA-wf5p-g6vw-rhxx", state: "FIXED", stateCls: "text-[var(--good)]" },
+  { pkg: "next", sev: "high", rest: "GHSA-abc1-23de-45fg", state: "OPEN", stateCls: "text-[var(--bad)]" },
+  { pkg: "underscore", sev: "high", rest: "GHSA-cf4h-3j7x-mhff", state: "OPEN", stateCls: "text-[var(--bad)]" },
+];
+
+const STEPS = [
+  {
+    n: "01",
+    k: "IMPORT",
+    title: "Paste the scanner output you already have",
+    body: "npm audit --json or osv-scanner --json, straight from your terminal. PatchLedger parses it deterministically - advisory-level dedupe, severity normalization, CVSS 3.1 vector scoring. No repository access, no tokens, nothing scanned.",
+  },
+  {
+    n: "02",
+    k: "RECORD",
+    title: "Every advisory becomes an evidence record",
+    body: "Fixed means a PR, commit or release is on the record. Verified means a passing test or build run backs it. False positives and accepted risks stay visible with the reason, where your client can read them.",
+  },
+  {
+    n: "03",
+    k: "PROVE",
+    title: "Ship the monthly proof, not a promise",
+    body: "A branded report freezes the state: what was fixed, what was verified with a passing run, what is still open and inside or past its SLA. Honest limitations printed on every page, because a report that overpromises is a liability.",
+  },
+];
+
+const NOTS = [
+  ["Not a scanner", "Dependabot, osv-scanner and Trivy scan for free. PatchLedger is the record that starts after the alert."],
+  ["Not an audit", "Reports state the scanner, the date and the scope - and say plainly they are not security certification."],
+  ["Not repo-connected", "Read-only by design: no GitHub app, no tokens, no PRs opened, no code uploaded anywhere."],
+  ["Not AI-generated", "Parsing, dedupe, SLA math and reports are deterministic. No customer data reaches a model."],
+];
+
 export default async function LandingPage() {
   const sample = await demoReportLink();
 
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="border-b border-[var(--border)] bg-[var(--surface)]">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-2 font-bold tracking-tight">
-            <span
-              className="inline-block h-6 w-6 rounded-md"
-              style={{ background: "var(--accent)" }}
-              aria-hidden
-            />
-            PatchLedger
-          </div>
-          <nav className="flex items-center gap-3 text-sm">
+      <header className="border-b border-[var(--border)] bg-[var(--bg)]">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+          <Link href="/" className="flex items-center gap-2.5">
+            <span aria-hidden className="grid h-6 w-6 place-items-center border-2 border-[var(--accent)]">
+              <span className="block h-2.5 w-2.5 bg-[var(--accent)]" />
+            </span>
+            <span className="font-mono text-sm font-semibold tracking-[0.18em] text-[var(--ink)]">
+              PATCHLEDGER
+            </span>
+          </Link>
+          <nav className="flex items-center gap-5 text-sm">
             <Link href="/pricing" className="text-[var(--muted)] hover:text-[var(--ink)]">
               Pricing
             </Link>
@@ -43,8 +78,7 @@ export default async function LandingPage() {
             </Link>
             <Link
               href="/signup"
-              className="rounded-lg px-3 py-1.5 font-semibold text-white"
-              style={{ background: "var(--accent)" }}
+              className="bg-[var(--accent)] px-4 py-1.5 font-mono text-xs font-semibold uppercase tracking-[0.16em] text-[var(--accent-ink)] hover:brightness-110"
             >
               Start free
             </Link>
@@ -54,114 +88,152 @@ export default async function LandingPage() {
       </header>
 
       <main className="flex-1">
-        <section className="mx-auto max-w-5xl px-6 py-16 text-center">
-          <h1 className="mx-auto max-w-3xl text-4xl font-bold tracking-tight sm:text-5xl">
-            Prove your security maintenance, not just promise it.
-          </h1>
-          <p className="mx-auto mt-5 max-w-2xl text-lg text-[var(--muted)]">
-            PatchLedger turns the vulnerability scanner output you already have
-            (npm audit, osv-scanner) into a tracked record of what was fixed,
-            how it was verified, and what remains - with a branded,
-            client-ready report at the end.
-          </p>
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <Link
-              href="/signup"
-              className="rounded-lg px-5 py-2.5 font-semibold text-white"
-              style={{ background: "var(--accent)" }}
-            >
-              Create your workspace
-            </Link>
-            {sample ? (
-              <Link
-                href={sample}
-                className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-5 py-2.5 font-semibold"
-              >
-                See a sample client report
-              </Link>
-            ) : null}
+        {/* hero: split, left copy, right terminal record */}
+        <section className="ledger-grid border-b border-[var(--border)]">
+          <div className="mx-auto grid max-w-6xl gap-10 px-6 py-20 lg:grid-cols-[1.05fr_1fr] lg:items-center">
+            <div>
+              <p className="microlabel">Evidence ledger for dev agencies</p>
+              <h1 className="mt-4 font-display text-4xl font-semibold leading-[1.05] tracking-tight sm:text-5xl">
+                Prove your security maintenance, not just promise it.
+              </h1>
+              <p className="mt-5 max-w-xl text-base leading-7 text-[var(--muted)]">
+                Scanner output in - an evidence-backed record out. PatchLedger tracks every
+                advisory from the vulnerability scans you already run, holds the fix and
+                verification evidence against it, and prints the branded monthly report
+                your clients can actually rely on.
+              </p>
+              <div className="mt-8 flex flex-wrap items-center gap-4">
+                <Link
+                  href="/signup"
+                  className="bg-[var(--accent)] px-6 py-3 font-mono text-xs font-semibold uppercase tracking-[0.18em] text-[var(--accent-ink)] hover:brightness-110"
+                >
+                  Create your ledger
+                </Link>
+                {sample ? (
+                  <Link
+                    href={sample}
+                    className="border border-[var(--border-strong)] px-6 py-3 font-mono text-xs font-semibold uppercase tracking-[0.18em] text-[var(--ink)] hover:border-[var(--accent)] hover:text-[var(--accent)]"
+                  >
+                    See a sample client report
+                  </Link>
+                ) : null}
+              </div>
+              <p className="mt-4 font-mono text-xs text-[var(--faint)]">
+                no repo access / no tokens / no scanning / no AI in the data path
+              </p>
+            </div>
+
+            <div className="border border-[var(--border)] bg-[var(--surface)] shadow-[0_0_0_1px_var(--border)]">
+              <div className="flex items-center justify-between border-b border-[var(--border)] px-4 py-2.5">
+                <span className="font-mono text-xs text-[var(--faint)]">npm audit --json</span>
+                <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--accent)]">
+                  live record
+                </span>
+              </div>
+              <div className="grid">
+                <div className="grid grid-cols-[1.6fr_1.4fr_auto] gap-x-4 border-b border-[var(--border)] px-4 py-2">
+                  <span className="microlabel">package</span>
+                  <span className="microlabel">advisory</span>
+                  <span className="microlabel text-right">state</span>
+                </div>
+                {TERMINAL_ROWS.map((r) => (
+                  <div
+                    key={r.rest}
+                    className="grid grid-cols-[1.6fr_1.4fr_auto] items-center gap-x-4 border-b border-[var(--border)] px-4 py-2.5 font-mono text-xs last:border-b-0"
+                  >
+                    <span className="text-[var(--ink)]">{r.pkg}</span>
+                    <span className="truncate text-[var(--faint)]">
+                      <span className={`mr-2 uppercase ${r.sev === "critical" ? "text-[var(--bad)]" : r.sev === "high" ? "text-[var(--warn)]" : "text-[var(--med)]"}`}>
+                        {r.sev}
+                      </span>
+                      {r.rest}
+                    </span>
+                    <span className={`text-right text-[10px] font-semibold tracking-[0.16em] ${r.stateCls}`}>
+                      {r.state}
+                    </span>
+                  </div>
+                ))}
+              </div>
+              <div className="flex items-center justify-between border-t border-[var(--border)] px-4 py-2.5">
+                <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--faint)]">
+                  sla 14d / 30d / 90d
+                </span>
+                <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--good)]">
+                  2 fixed - 1 verified
+                </span>
+              </div>
+            </div>
           </div>
-          <p className="mt-3 text-sm text-[var(--faint)]">
-            No repository access. No tokens. No scanning. You paste the JSON you already generate.
-          </p>
         </section>
 
-        <section className="border-y border-[var(--border)] bg-[var(--surface)]">
-          <div className="mx-auto grid max-w-5xl gap-8 px-6 py-14 sm:grid-cols-3">
-            {[
-              {
-                step: "1. Import",
-                body: "Run npm audit --json or osv-scanner --json in your project and paste the output. PatchLedger parses it deterministically - no AI, no guesswork, nothing leaves your machine except the pasted text.",
-              },
-              {
-                step: "2. Track evidence",
-                body: "Triage findings, attach fix evidence (PR or release link) and verification evidence (test or build run), and watch SLA status per severity. Fixed means you recorded it; verified means a passing run backs it.",
-              },
-              {
-                step: "3. Share the proof",
-                body: "Generate a branded, dated report: what changed, what was verified, what is still open and why. Honest limitations included, because a report that overpromises is a liability.",
-              },
-            ].map((c) => (
-              <div key={c.step}>
-                <h2 className="font-semibold" style={{ color: "var(--accent)" }}>
-                  {c.step}
-                </h2>
-                <p className="mt-2 text-sm leading-6 text-[var(--muted)]">{c.body}</p>
+        {/* numbered ledger rows */}
+        <section className="border-b border-[var(--border)] bg-[var(--surface)]">
+          <div className="mx-auto max-w-6xl px-6 py-16">
+            {STEPS.map((s) => (
+              <div
+                key={s.n}
+                className="grid gap-4 border-b border-[var(--border)] py-8 last:border-b-0 md:grid-cols-[80px_160px_1fr_1.6fr] md:items-baseline md:gap-8"
+              >
+                <span className="font-display text-3xl font-semibold text-[var(--accent)]">{s.n}</span>
+                <span className="microlabel">{s.k}</span>
+                <h2 className="font-display text-lg font-semibold tracking-tight">{s.title}</h2>
+                <p className="text-sm leading-6 text-[var(--muted)]">{s.body}</p>
               </div>
             ))}
           </div>
         </section>
 
-        <section className="mx-auto max-w-5xl px-6 py-14">
-          <h2 className="text-2xl font-bold tracking-tight">What PatchLedger is not</h2>
-          <ul className="mt-4 grid gap-3 text-[var(--muted)] sm:grid-cols-2">
-            <li className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4 text-sm">
-              Not a scanner. Dependabot, osv-scanner and Trivy already scan for free.
-              PatchLedger is the missing layer after the alert: triage, evidence, SLA and the client report.
-            </li>
-            <li className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4 text-sm">
-              Not an audit or certification. Reports state exactly which scanner, which date, which scope - and say plainly that they are not proof of security.
-            </li>
-            <li className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4 text-sm">
-              Not a plug-in for your repo. Read-only by design: it never asks for GitHub access, never opens PRs, never touches your code.
-            </li>
-            <li className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4 text-sm">
-              Not AI-dependent. Parsing, dedupe, SLA math and reports are deterministic. No customer data is ever sent to a model.
-            </li>
-          </ul>
+        {/* spec sheet: what it is not */}
+        <section className="border-b border-[var(--border)]">
+          <div className="mx-auto max-w-6xl px-6 py-16">
+            <p className="microlabel">Scope statement</p>
+            <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight">What PatchLedger is not</h2>
+            <dl className="mt-8 grid gap-px border border-[var(--border)] bg-[var(--border)] sm:grid-cols-2">
+              {NOTS.map(([term, def]) => (
+                <div key={term} className="bg-[var(--surface)] p-6">
+                  <dt className="font-mono text-xs font-semibold uppercase tracking-[0.16em] text-[var(--accent)]">
+                    {term}
+                  </dt>
+                  <dd className="mt-2 text-sm leading-6 text-[var(--muted)]">{def}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
         </section>
 
-        <section className="border-t border-[var(--border)] bg-[var(--surface)]">
-          <div className="mx-auto max-w-5xl px-6 py-14">
-            <h2 className="text-center text-2xl font-bold tracking-tight">Pricing</h2>
-            <div className="mt-8 grid gap-6 sm:grid-cols-3">
+        {/* pricing: ledger table */}
+        <section>
+          <div className="mx-auto max-w-6xl px-6 py-16">
+            <p className="microlabel">Rates</p>
+            <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight">Flat monthly. No per-seat metering.</h2>
+            <div className="mt-8 border border-[var(--border)]">
               {Object.values(PLANS)
                 .filter((p) => p.key !== "demo")
-                .map((p) => (
+                .map((p, i) => (
                   <div
                     key={p.key}
-                    className="rounded-2xl border border-[var(--border)] bg-[var(--bg)] p-6"
+                    className={`grid items-center gap-2 px-6 py-5 sm:grid-cols-[140px_120px_1fr] ${i > 0 ? "border-t border-[var(--border)]" : ""} bg-[var(--surface)]`}
                   >
-                    <h3 className="font-semibold">{p.label}</h3>
-                    <p className="mt-1 text-3xl font-bold">
+                    <span className="font-mono text-sm font-semibold uppercase tracking-[0.16em]">{p.label}</span>
+                    <span className="font-display text-2xl font-semibold text-[var(--accent)]">
                       ${p.priceUsd}
-                      <span className="text-base font-normal text-[var(--faint)]">/mo</span>
-                    </p>
-                    <p className="mt-3 text-sm text-[var(--muted)]">{p.blurb}</p>
+                      <span className="font-body text-sm font-normal text-[var(--faint)]">/mo</span>
+                    </span>
+                    <span className="text-sm text-[var(--muted)]">{p.blurb}</span>
                   </div>
                 ))}
             </div>
-            <p className="mt-6 text-center text-sm text-[var(--faint)]">
-              Billing is not enabled yet while the product is in validation. Free during the pilot.
+            <p className="mt-4 font-mono text-xs text-[var(--faint)]">
+              billing disabled during pilot - free until then
             </p>
           </div>
         </section>
       </main>
 
       <footer className="border-t border-[var(--border)] bg-[var(--surface)]">
-        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-6 py-6 text-sm text-[var(--muted)]">
-          <span>PatchLedger - evidence-backed security maintenance for client projects.</span>
-          <div className="flex gap-4">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-6 py-6 font-mono text-xs text-[var(--muted)]">
+          <span className="uppercase tracking-[0.18em]">PatchLedger - evidence, not promises</span>
+          <div className="flex gap-5">
             <Link href="/pricing" className="hover:text-[var(--ink)]">Pricing</Link>
             <Link href="/legal/privacy" className="hover:text-[var(--ink)]">Privacy</Link>
             <Link href="/legal/terms" className="hover:text-[var(--ink)]">Terms</Link>

@@ -28,10 +28,14 @@ export default async function PublicReportPage({
   return (
     <div className="flex min-h-screen flex-col bg-[var(--bg)]">
       <div className="no-print border-b border-[var(--border)] bg-[var(--surface)]">
-        <div className="mx-auto flex max-w-3xl items-center justify-between px-6 py-3 text-xs text-[var(--faint)]">
-          <span>Shared maintenance report - unlisted link (noindex)</span>
+        <div className="mx-auto flex max-w-3xl items-center justify-between px-6 py-3">
+          <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--faint)]">
+            shared record - unlisted link
+          </span>
           <div className="flex items-center gap-3">
-            <span>Generated {report.createdAt.toISOString().slice(0, 10)}</span>
+            <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--faint)]">
+              generated {report.createdAt.toISOString().slice(0, 10)}
+            </span>
             <ThemeToggle />
           </div>
         </div>
@@ -43,8 +47,8 @@ export default async function PublicReportPage({
         title={report.title}
         periodLabel={report.periodLabel}
       />
-      <footer className="no-print border-t border-[var(--border)] bg-[var(--surface)] py-6 text-center text-xs text-[var(--faint)]">
-        Prepared with PatchLedger - evidence-backed security maintenance records.
+      <footer className="no-print border-t border-[var(--border)] bg-[var(--surface)] py-6 text-center font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--faint)]">
+        prepared with PatchLedger - evidence, not promises
       </footer>
     </div>
   );

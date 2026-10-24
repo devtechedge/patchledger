@@ -3,7 +3,7 @@ export const metadata = { title: "Terms - PatchLedger" };
 export default function TermsPage() {
   return (
     <div className="mx-auto max-w-2xl px-6 py-16">
-      <h1 className="text-3xl font-bold tracking-tight">Terms of service</h1>
+      <h1 className="font-display text-3xl font-semibold tracking-tight">Terms of service</h1>
       <p className="mt-2 text-xs text-[var(--faint)]">
         Working document - legal review pending before any paid launch.
       </p>

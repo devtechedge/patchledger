@@ -24,7 +24,8 @@ export default async function SettingsPage({ params }: PageProps<"/p/[id]/settin
         <Link href={`/p/${project.id}`} className="text-sm text-[var(--muted)] hover:text-[var(--ink)]">
           &larr; {project.name}
         </Link>
-        <h1 className="mt-2 text-2xl font-bold tracking-tight">Project settings</h1>
+        <p className="microlabel">Settings</p>
+        <h1 className="mt-1 font-display text-2xl font-semibold tracking-tight">{project.name}</h1>
       </div>
       <Panel title="Client, stack and SLA targets">
         <SettingsForm

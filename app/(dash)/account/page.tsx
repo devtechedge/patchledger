@@ -15,9 +15,10 @@ export default async function AccountPage() {
   return (
     <div className="grid max-w-2xl gap-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Account</h1>
-        <p className="mt-1 text-sm text-[var(--muted)]">
-          {profile.email} - {plan.label} plan ({plan.projects} projects).
+        <p className="microlabel">Account</p>
+        <h1 className="mt-1 font-display text-2xl font-semibold tracking-tight">{profile.email}</h1>
+        <p className="mt-1 font-mono text-xs text-[var(--faint)]">
+          {plan.label} plan - {plan.projects} projects
         </p>
       </div>
 

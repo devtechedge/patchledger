@@ -8,13 +8,13 @@ export interface ReportBranding {
   projectName: string;
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({ title, index, children }: { title: string; index: string; children: React.ReactNode }) {
   return (
-    <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6">
-      <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-[var(--faint)]">
-        {title}
+    <section className="border border-[var(--border)] bg-[var(--surface)]">
+      <h2 className="microlabel border-b border-[var(--border)] px-6 py-3">
+        {index} / {title}
       </h2>
-      {children}
+      <div className="px-6 py-5">{children}</div>
     </section>
   );
 }
@@ -27,22 +27,23 @@ function FindingRows({
   empty: string;
 }) {
   if (items.length === 0) {
-    return <p className="text-sm text-[var(--muted)]">{empty}</p>;
+    return <p className="font-mono text-xs text-[var(--faint)]">{empty}</p>;
   }
   return (
-    <ul className="grid gap-2">
+    <ul className="grid gap-px bg-[var(--border)]">
       {items.map((f) => (
-        <li
-          key={`${f.ecosystem}-${f.package}-${f.advisoryId}`}
-          className="rounded-xl border border-[var(--border)] bg-[var(--bg)] px-4 py-3 text-sm"
-        >
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="font-semibold">{f.package}</span>
+        <li key={`${f.ecosystem}-${f.package}-${f.advisoryId}`} className="bg-[var(--surface)] px-4 py-3 text-sm">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <span className="font-mono text-sm font-semibold text-[var(--ink)]">{f.package}</span>
             <span
-              className="inline-block rounded-full border px-2 py-0.5 text-xs font-semibold"
-              data-severity={f.severity}
+              className="border px-1.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.14em]"
               style={{
-                borderColor: "var(--border)",
+                borderColor:
+                  f.severity === "critical"
+                    ? "var(--bad)"
+                    : f.severity === "high"
+                      ? "var(--warn)"
+                      : "var(--faint)",
                 color:
                   f.severity === "critical"
                     ? "var(--bad)"
@@ -53,10 +54,10 @@ function FindingRows({
             >
               {f.severity}
             </span>
-            <span className="font-mono text-xs text-[var(--faint)]">{f.advisoryId}</span>
+            <span className="font-mono text-[10px] text-[var(--faint)]">{f.advisoryId}</span>
           </div>
           <p className="mt-1 text-[var(--muted)]">{f.title}</p>
-          <p className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs text-[var(--faint)]">
+          <p className="mt-1 flex flex-wrap gap-x-4 gap-y-1 font-mono text-xs text-[var(--faint)]">
             {f.fixedInVersion ? <span>fixed in {f.fixedInVersion}</span> : null}
             {f.fixUrl ? (
               <a href={f.fixUrl} className="underline" style={{ color: "var(--accent)" }}>
@@ -85,6 +86,7 @@ const SOURCE_LABEL: Record<string, string> = {
 /**
  * Renders the frozen report summary. Used by the public share page; the
  * summary passed in was fixed at generation time and never recomputed.
+ * Styled as a formal document: sharp rules, mono data, amber accents.
  */
 export function ReportView({
   branding,
@@ -99,73 +101,69 @@ export function ReportView({
   title: string;
   periodLabel: string;
 }) {
-  const accent = /^#[0-9a-fA-F]{6}$/.test(branding.accentColor)
-    ? branding.accentColor
-    : "#2563eb";
-  const openCounts = Object.entries(summary.counts.bySeverity).filter(
-    ([, n]) => n > 0
-  );
+  const openCounts = Object.entries(summary.counts.bySeverity).filter(([, n]) => n > 0);
 
   return (
     <article className="mx-auto grid max-w-3xl gap-6 px-6 py-10">
-      <header
-        className="rounded-2xl border p-8"
-        style={{ borderColor: accent, background: "var(--surface)" }}
-      >
-        <p className="text-sm font-semibold uppercase tracking-wide" style={{ color: accent }}>
-          {branding.agencyName || "Maintenance report"}
-        </p>
-        <h1 className="mt-2 text-2xl font-bold tracking-tight">{title}</h1>
-        <p className="mt-1 text-sm text-[var(--muted)]">
-          {periodLabel}
-          {branding.clientName ? ` - prepared for ${branding.clientName}` : ""}
-          {` - project: ${summary.project.name}`}
-        </p>
-        {summary.latestImport ? (
-          <p className="mt-3 text-xs text-[var(--faint)]">
-            Latest import: {SOURCE_LABEL[summary.latestImport.source] ?? summary.latestImport.source},{" "}
-            {summary.latestImport.importedAt.slice(0, 10)} ({summary.latestImport.findingCount} advisories
-            reported at import time).
+      <header className="border-2 border-[var(--border-strong)] bg-[var(--surface)]">
+        <div
+          className="flex items-center justify-between px-8 py-3"
+          style={{ background: "var(--accent)" }}
+        >
+          <span className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-[var(--accent-ink)]">
+            {branding.agencyName || "Maintenance report"}
+          </span>
+          <span className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-[var(--accent-ink)]">
+            {periodLabel}
+          </span>
+        </div>
+        <div className="px-8 py-7">
+          <h1 className="font-display text-2xl font-semibold tracking-tight">{title}</h1>
+          <p className="mt-2 text-sm text-[var(--muted)]">
+            {branding.clientName ? `Prepared for ${branding.clientName} - ` : ""}
+            project: {summary.project.name}
           </p>
-        ) : null}
+          {summary.latestImport ? (
+            <p className="mt-4 border-l-2 border-[var(--border-strong)] pl-3 font-mono text-xs text-[var(--faint)]">
+              source of record: {SOURCE_LABEL[summary.latestImport.source] ?? summary.latestImport.source},{" "}
+              imported {summary.latestImport.importedAt.slice(0, 10)} ({summary.latestImport.findingCount} advisories
+              reported at import time)
+            </p>
+          ) : null}
+        </div>
       </header>
 
-      <Section title="Open findings at a glance">
+      <Section title="Open findings" index="01">
         {openCounts.length === 0 ? (
           <p className="text-sm text-[var(--muted)]">
             No open advisories from the latest import. This reflects the imported scanner output, not a
             security guarantee.
           </p>
         ) : (
-          <div className="flex flex-wrap gap-3">
+          <div className="grid grid-cols-2 gap-px bg-[var(--border)] sm:grid-cols-5">
             {openCounts.map(([sev, n]) => (
-              <div
-                key={sev}
-                className="rounded-xl border border-[var(--border)] bg-[var(--bg)] px-5 py-3 text-center"
-              >
-                <div className="text-2xl font-bold">{n}</div>
-                <div className="text-xs uppercase tracking-wide text-[var(--faint)]">{sev}</div>
+              <div key={sev} className="bg-[var(--surface)] px-4 py-4 text-center">
+                <div className="font-display text-3xl font-semibold">{n}</div>
+                <div className="microlabel mt-1">{sev}</div>
               </div>
             ))}
           </div>
         )}
       </Section>
 
-      <Section title={`SLA compliance (critical ${summary.sla.criticalDays}d / high ${summary.sla.highDays}d / medium ${summary.sla.mediumDays}d)`}>
+      <Section title={`SLA compliance (critical ${summary.sla.criticalDays}d / high ${summary.sla.highDays}d / medium ${summary.sla.mediumDays}d)`} index="02">
         {summary.sla.tracked === 0 ? (
-          <p className="text-sm text-[var(--muted)]">
-            No SLA-tracked open findings right now.
-          </p>
+          <p className="text-sm text-[var(--muted)]">No SLA-tracked open findings right now.</p>
         ) : (
           <>
             <p className="text-sm">
-              <span className="text-2xl font-bold">{summary.sla.compliancePct}%</span>{" "}
+              <span className="font-display text-3xl font-semibold">{summary.sla.compliancePct}%</span>{" "}
               of open SLA-tracked findings are inside their target window ({summary.sla.within} of{" "}
               {summary.sla.tracked}; {summary.sla.breached} past due).
             </p>
             {summary.breachedOpen.length > 0 ? (
-              <div className="mt-3">
-                <p className="mb-2 text-sm font-semibold">Past due:</p>
+              <div className="mt-4">
+                <p className="microlabel mb-2">Past due</p>
                 <FindingRows items={summary.breachedOpen} empty="" />
               </div>
             ) : null}
@@ -173,27 +171,21 @@ export function ReportView({
         )}
       </Section>
 
-      <Section title="Fixed in this period (with recorded evidence)">
-        <FindingRows
-          items={summary.fixedSince}
-          empty="Nothing was recorded as fixed in this period."
-        />
+      <Section title="Fixed in this period (recorded evidence)" index="03">
+        <FindingRows items={summary.fixedSince} empty="Nothing was recorded as fixed in this period." />
       </Section>
 
-      <Section title="Verified with a passing run">
-        <FindingRows
-          items={summary.verifiedSince}
-          empty="No fixes carry verification evidence in this period."
-        />
+      <Section title="Verified with a passing run" index="04">
+        <FindingRows items={summary.verifiedSince} empty="No fixes carry verification evidence in this period." />
       </Section>
 
-      <Section title="Newly reported in this period">
+      <Section title="Newly reported in this period" index="05">
         <FindingRows items={summary.newSince} empty="No new advisories appeared in this period." />
       </Section>
 
       {summary.oldestOpen.length > 0 ? (
-        <Section title="Longest-standing open items">
-          <ul className="grid gap-1 text-sm text-[var(--muted)]">
+        <Section title="Longest-standing open items" index="06">
+          <ul className="grid gap-1.5 font-mono text-xs text-[var(--muted)]">
             {summary.oldestOpen.map((f) => (
               <li key={`${f.ecosystem}-${f.package}-${f.advisoryId}`}>
                 {f.package} ({f.severity}) - open for {f.daysOpen} day{f.daysOpen === 1 ? "" : "s"}
@@ -204,20 +196,20 @@ export function ReportView({
       ) : null}
 
       {agencyNote ? (
-        <Section title="Note from us">
-          <p className="whitespace-pre-line text-sm text-[var(--muted)]">{agencyNote}</p>
+        <Section title="Note from us" index="07">
+          <p className="whitespace-pre-line text-sm leading-6 text-[var(--muted)]">{agencyNote}</p>
         </Section>
       ) : null}
 
-      <footer className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-6">
-        <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-[var(--faint)]">
-          Scope and limitations
-        </h2>
-        <p className="text-xs leading-5 text-[var(--muted)]">{summary.limitations}</p>
-        <p className="mt-4 text-xs text-[var(--faint)]">
-          Generated {summary.generatedAt.slice(0, 10)} by PatchLedger.
-          {branding.contactEmail ? ` Questions: ${branding.contactEmail}` : ""}
-        </p>
+      <footer className="border border-[var(--border)] bg-[var(--surface-2)]">
+        <h2 className="microlabel border-b border-[var(--border)] px-6 py-3">Scope and limitations</h2>
+        <div className="px-6 py-5">
+          <p className="font-mono text-xs leading-5 text-[var(--muted)]">{summary.limitations}</p>
+          <p className="mt-4 font-mono text-xs text-[var(--faint)]">
+            generated {summary.generatedAt.slice(0, 10)} by PatchLedger
+            {branding.contactEmail ? ` - questions: ${branding.contactEmail}` : ""}
+          </p>
+        </div>
       </footer>
     </article>
   );

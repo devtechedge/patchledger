@@ -10,30 +10,28 @@ export default async function DashLayout({ children }: { children: React.ReactNo
 
   return (
     <div className="min-h-screen">
-      <header className="border-b border-[var(--border)] bg-[var(--surface)]">
-        <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-6 py-3">
-          <div className="flex items-center gap-6">
-            <Link href="/dashboard" className="flex items-center gap-2 font-bold tracking-tight">
-              <span
-                className="inline-block h-5 w-5 rounded-md"
-                style={{ background: account.accentColor }}
-                aria-hidden
-              />
-              PatchLedger
+      <header className="border-b border-[var(--border)] bg-[var(--bg)]">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-3">
+          <div className="flex items-center gap-7">
+            <Link href="/dashboard" className="flex items-center gap-2.5">
+              <span aria-hidden className="grid h-5 w-5 place-items-center border-2 border-[var(--accent)]">
+                <span className="block h-2 w-2 bg-[var(--accent)]" />
+              </span>
+              <span className="font-mono text-xs font-semibold tracking-[0.18em]">PATCHLEDGER</span>
             </Link>
-            <nav className="flex items-center gap-4 text-sm text-[var(--muted)]">
-              <Link href="/dashboard" className="hover:text-[var(--ink)]">Projects</Link>
-              <Link href="/account" className="hover:text-[var(--ink)]">Account</Link>
+            <nav className="flex items-center gap-5 font-mono text-xs uppercase tracking-[0.14em] text-[var(--muted)]">
+              <Link href="/dashboard" className="hover:text-[var(--accent)]">Projects</Link>
+              <Link href="/account" className="hover:text-[var(--accent)]">Account</Link>
             </nav>
           </div>
-          <div className="flex items-center gap-4 text-sm">
-            <span className="text-[var(--faint)]">{account.email}</span>
+          <div className="flex items-center gap-4 font-mono text-xs text-[var(--faint)]">
+            <span>{account.email}</span>
             <ThemeToggle />
             <LogoutButton />
           </div>
         </div>
       </header>
-      <main className="mx-auto max-w-5xl px-6 py-8">{children}</main>
+      <main className="mx-auto max-w-6xl px-6 py-8">{children}</main>
     </div>
   );
 }

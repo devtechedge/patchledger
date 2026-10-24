@@ -1,6 +1,6 @@
 /**
  * Captures README screenshots from the live production alias and renders the
- * 1280x640 social preview card. Run: node scripts/capture-shots.mjs
+ * 1280x640 social preview card (dark "ledger" identity). Run: node scripts/capture-shots.mjs
  * Requires chromium: npx playwright install chromium
  */
 import { mkdirSync, writeFileSync } from "node:fs";
@@ -15,7 +15,7 @@ const DEMO = { email: "demo@patchledger.test", password: "demo-password-1" };
 const browser = await chromium.launch();
 const ctx = await browser.newContext({
   viewport: { width: 1440, height: 900 },
-  colorScheme: "light",
+  colorScheme: "dark",
 });
 const page = await ctx.newPage();
 
@@ -37,7 +37,7 @@ await page.getByRole("button", { name: "Sign in" }).click();
 await page.waitForURL("**/dashboard");
 await shot("02-dashboard");
 
-// project overview with findings + SLA cards
+// project overview with findings table + SLA stats
 await page.getByRole("link", { name: /Northwind Portal/ }).click();
 await page.waitForURL("**/p/**");
 await shot("03-project-findings");
@@ -61,39 +61,46 @@ console.log("captured 06-client-report");
 
 await browser.close();
 
-// social preview card: 1280x640, dark slate, flat product crop
+// social preview card: 1280x640, ink + amber ledger identity
 const card = `<!doctype html><html><head><meta charset="utf-8"><style>
   * { margin: 0; box-sizing: border-box; }
   html, body { width: 1280px; height: 640px; }
   body {
-    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-    background: linear-gradient(135deg, #0b1220 0%, #101c33 60%, #0d2a4d 100%);
-    color: #e3e9f2; display: flex; align-items: center; padding: 0 88px;
+    font-family: ui-sans-serif, system-ui, "Segoe UI", sans-serif;
+    background: #0c0f14; color: #e8ecf2; position: relative; overflow: hidden;
   }
-  .mark { display: flex; align-items: center; gap: 20px; }
-  .shield { width: 76px; height: 76px; border-radius: 18px; background: #2563eb;
-    display: grid; place-items: center; }
-  .shield svg { width: 44px; height: 44px; }
-  h1 { font-size: 74px; letter-spacing: -2px; }
-  .tag { margin-top: 26px; font-size: 30px; line-height: 1.45; color: #b6c2d6; max-width: 900px; }
-  .tag b { color: #e3e9f2; font-weight: 600; }
-  ul { margin-top: 40px; list-style: none; display: flex; gap: 18px; }
-  li { font-size: 21px; color: #9fb0c8; border: 1px solid #22304a; border-radius: 999px;
-    padding: 10px 24px; background: #121b2d; }
-  .foot { position: absolute; right: 88px; bottom: 56px; font-size: 19px; color: #64748b;
-    font-family: ui-monospace, monospace; }
+  .grid-bg {
+    position: absolute; inset: 0; opacity: 0.5;
+    background-image:
+      linear-gradient(rgba(148,163,184,0.07) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(148,163,184,0.07) 1px, transparent 1px);
+    background-size: 36px 36px;
+  }
+  .wrap { position: relative; padding: 88px 96px; }
+  .mark { display: flex; align-items: center; gap: 18px; }
+  .box { width: 44px; height: 44px; border: 3px solid #f59e0b; display: grid; place-items: center; }
+  .box span { width: 16px; height: 16px; background: #f59e0b; display: block; }
+  h1 { font-family: ui-monospace, monospace; font-size: 30px; letter-spacing: 0.22em; }
+  .line { margin-top: 48px; height: 2px; width: 120px; background: #f59e0b; }
+  .tag { margin-top: 36px; font-size: 46px; line-height: 1.15; font-weight: 700;
+    letter-spacing: -0.5px; max-width: 1000px; }
+  .tag em { color: #f59e0b; font-style: normal; }
+  .sub { margin-top: 26px; font-size: 24px; color: #9aa6b6; }
+  ul { margin: 0; padding: 0; list-style: none; position: absolute; left: 96px; bottom: 84px;
+    display: flex; gap: 14px; }
+  li { font-family: ui-monospace, monospace; font-size: 15px; letter-spacing: 0.14em;
+    color: #9aa6b6; border: 1px solid #232b37; padding: 8px 18px; background: #12161d;
+    text-transform: uppercase; }
+  .foot { position: absolute; right: 96px; bottom: 92px; font-family: ui-monospace, monospace;
+    font-size: 16px; color: #64707f; letter-spacing: 0.18em; }
 </style></head><body>
-  <div>
-    <div class="mark">
-      <div class="shield"><svg viewBox="0 0 32 32" fill="none">
-        <path d="M16 3l9 3.4v8c0 5.6-3.8 9.6-9 11.2-5.2-1.6-9-5.6-9-11.2v-8L16 3z" fill="#fff"/>
-        <path d="M12 16.2l2.8 2.8L20.5 13" stroke="#2563eb" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg></div>
-      <h1>PatchLedger</h1>
-    </div>
-    <p class="tag">Prove your security maintenance, not just promise it.<br/>
-      Scanner output in, <b>evidence-backed client reports</b> out.</p>
-    <ul><li>npm audit + osv-scanner</li><li>fix + verification evidence</li><li>SLA tracking</li><li>branded reports</li></ul>
+  <div class="grid-bg"></div>
+  <div class="wrap">
+    <div class="mark"><div class="box"><span></span></div><h1>PATCHLEDGER</h1></div>
+    <div class="line"></div>
+    <p class="tag">Prove your security maintenance.<br/><em>Evidence, not promises.</em></p>
+    <p class="sub">Scanner output in. An evidence-backed record out.</p>
+    <ul><li>npm audit</li><li>osv-scanner</li><li>fix + verify evidence</li><li>sla tracking</li></ul>
     <div class="foot">patchledger.vercel.app</div>
   </div>
 </body></html>`;
@@ -104,5 +111,5 @@ await p2.setContent(card, { waitUntil: "networkidle" });
 await p2.screenshot({ path: `${OUT}/social-preview.png` });
 await b2.close();
 console.log("captured social-preview");
-writeFileSync(`${OUT}/README.md`, "# Product screenshots\n\nCaptured from the live production deploy; regenerate with `node scripts/capture-shots.mjs`.\n");
+writeFileSync(`${OUT}/README.md`, "# Product screenshots\n\nCaptured from the live production deploy (dark ledger identity); regenerate with `node scripts/capture-shots.mjs`.\n");
 console.log("done");

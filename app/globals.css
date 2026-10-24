@@ -2,52 +2,83 @@
 
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
+/* PatchLedger: "the ledger" identity. Dark-first ink + amber signal accent,
+   sharp corners, mono data. Deliberately unlike CareProof's soft silver/blue. */
 :root {
-  --background: var(--bg);
-  --foreground: var(--ink);
-  color-scheme: light;
-  /* light: cool titanium silver + ink */
-  --bg: #eef1f6;
-  --surface: #fcfdff;
-  --surface-2: #f0f3f8;
-  --ink: #101828;
-  --muted: #46536a;
-  --faint: #7d8899;
-  --border: #d5dce6;
-  --accent: #2563eb;
-  --good: #15803d;
-  --warn: #b45309;
-  --bad: #b91c1c;
-  --scroll-thumb: #9aa7b8;
+  color-scheme: dark;
+  --bg: #0c0f14;
+  --surface: #12161d;
+  --surface-2: #171c25;
+  --ink: #e8ecf2;
+  --muted: #9aa6b6;
+  --faint: #64707f;
+  --border: #232b37;
+  --border-strong: #37424f;
+  --accent: #f59e0b;
+  --accent-ink: #17120a; /* text on amber */
+  --good: #34d399;
+  --warn: #fb923c;
+  --med: #eab308;
+  --info: #38bdf8;
+  --note: #a78bfa;
+  --bad: #f87171;
+  --low: #94a3b8;
+  --scroll-thumb: #37424f;
+  --grid-line: rgba(148, 163, 184, 0.06);
 }
 
-[data-theme="dark"] {
-  color-scheme: dark;
-  /* dark: cool slate */
-  --bg: #0b1220;
-  --surface: #121b2d;
-  --surface-2: #0e1626;
-  --ink: #e3e9f2;
-  --muted: #98a4b8;
-  --faint: #64748b;
-  --border: #22304a;
-  --accent: #3b82f6;
-  --good: #4ade80;
-  --warn: #fbbf24;
-  --bad: #f87171;
-  --scroll-thumb: #32476a;
+[data-theme="light"] {
+  color-scheme: light;
+  /* cool paper, not cream: warm-neutral gray with strong ink */
+  --bg: #f2f3f4;
+  --surface: #fbfbfa;
+  --surface-2: #e9eaeb;
+  --ink: #171a1f;
+  --muted: #4c5560;
+  --faint: #7b848f;
+  --border: #d4d7da;
+  --border-strong: #aab0b7;
+  --accent: #b45309;
+  --accent-ink: #fffaf3;
+  --good: #047857;
+  --warn: #c2410c;
+  --med: #a16207;
+  --info: #0369a1;
+  --note: #6d28d9;
+  --bad: #b91c1c;
+  --low: #64748b;
+  --scroll-thumb: #aab0b7;
+  --grid-line: rgba(23, 26, 31, 0.05);
 }
 
 @theme inline {
-  --color-background: var(--background);
+  --color-background: var(--bg);
   --color-foreground: var(--ink);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-body);
+  --font-mono: var(--font-plex-mono);
+  --font-display: var(--font-space-grotesk);
 }
 
 body {
   background: var(--bg);
   color: var(--ink);
+}
+
+/* ruled ledger-paper texture for hero/band backgrounds */
+.ledger-grid {
+  background-image:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+/* micro label: section eyebrows, table headers */
+.microlabel {
+  font-family: var(--font-plex-mono), ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--faint);
 }
 
 /* overlay hover-reveal scrollbars: thin, invisible until the pointer is over that pane.
@@ -65,7 +96,7 @@ html {
 }
 ::-webkit-scrollbar-thumb {
   background: transparent;
-  border-radius: 4px;
+  border-radius: 0;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
@@ -98,16 +129,26 @@ pre:hover::-webkit-scrollbar-thumb {
 /* client reports always print on white, whatever the screen theme is */
 @media print {
   :root,
-  [data-theme="dark"] {
+  [data-theme="light"] {
     color-scheme: light;
     --bg: #ffffff;
     --surface: #ffffff;
-    --surface-2: #f3f5f8;
-    --ink: #101828;
-    --muted: #46536a;
-    --faint: #7d8899;
-    --border: #d5dce6;
-    --scroll-thumb: #9aa7b8;
+    --surface-2: #f2f2f0;
+    --ink: #171a1f;
+    --muted: #4c5560;
+    --faint: #7b848f;
+    --border: #d4d7da;
+    --border-strong: #aab0b7;
+    --accent: #b45309;
+    --accent-ink: #fffaf3;
+    --good: #047857;
+    --warn: #c2410c;
+    --med: #a16207;
+    --info: #0369a1;
+    --note: #6d28d9;
+    --bad: #b91c1c;
+    --low: #64748b;
+    --scroll-thumb: #aab0b7;
   }
   .no-print {
     display: none !important;

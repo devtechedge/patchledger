@@ -14,56 +14,67 @@ export default async function DashboardPage() {
 
   return (
     <div className="grid gap-8">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Projects</h1>
-        <p className="mt-1 text-sm text-[var(--muted)]">
-          {projects.length} of {plan.projects} projects on the {plan.label} plan.
-          Each project holds its own imports, findings, evidence and reports.
+      <div className="flex flex-wrap items-end justify-between gap-3 border-b border-[var(--border)] pb-5">
+        <div>
+          <p className="microlabel">Ledger</p>
+          <h1 className="mt-1 font-display text-2xl font-semibold tracking-tight">Projects</h1>
+        </div>
+        <p className="font-mono text-xs text-[var(--faint)]">
+          {projects.length} / {plan.projects} on the {plan.label} plan
         </p>
       </div>
 
-      <Panel title="Add a client project">
-        <CreateProjectForm />
-      </Panel>
-
       {projects.length === 0 ? (
-        <Empty>
-          No projects yet. Add one above, then import <code>npm audit --json</code> or{" "}
-          <code>osv-scanner --json</code> output for it.
-        </Empty>
+        <>
+          <Panel title="Add a client project" index="00">
+            <CreateProjectForm />
+          </Panel>
+          <Empty>
+            No projects yet. Add one above, then import npm audit --json or osv-scanner --json output for it.
+          </Empty>
+        </>
       ) : (
-        <ul className="grid gap-4 sm:grid-cols-2">
-          {projects.map((p) => {
-            const crit = p.openBySeverity["critical"] ?? 0;
-            const high = p.openBySeverity["high"] ?? 0;
-            return (
-              <li key={p.id}>
+        <>
+          <Panel title="Add a client project" index="+">
+            <CreateProjectForm />
+          </Panel>
+
+          <div className="border border-[var(--border)]">
+            <div className="grid grid-cols-[1.4fr_1fr_110px_90px_150px] gap-x-4 border-b border-[var(--border)] bg-[var(--surface-2)] px-4 py-2.5">
+              <span className="microlabel">project</span>
+              <span className="microlabel">client</span>
+              <span className="microlabel text-right">open</span>
+              <span className="microlabel text-right">crit</span>
+              <span className="microlabel text-right">last import</span>
+            </div>
+            {projects.map((p, i) => {
+              const crit = p.openBySeverity["critical"] ?? 0;
+              return (
                 <Link
+                  key={p.id}
                   href={`/p/${p.id}`}
-                  className="block rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 hover:border-[var(--accent)]"
+                  className={`grid grid-cols-[1.4fr_1fr_110px_90px_150px] items-center gap-x-4 px-4 py-3.5 hover:bg-[var(--surface-2)] ${i > 0 ? "border-t border-[var(--border)]" : ""}`}
                 >
-                  <div className="flex items-baseline justify-between gap-2">
-                    <h2 className="font-semibold">{p.name}</h2>
-                    {p.clientName ? (
-                      <span className="text-xs text-[var(--faint)]">{p.clientName}</span>
-                    ) : null}
-                  </div>
-                  <p className="mt-2 text-sm text-[var(--muted)]">
-                    {p.openTotal === 0
-                      ? "No open findings"
-                      : `${p.openTotal} open (${crit} critical, ${high} high)`}
-                  </p>
-                  <p className="mt-1 text-xs text-[var(--faint)]">
-                    {p.lastImportAt
-                      ? `Last import ${p.lastImportAt.toISOString().slice(0, 10)} (${p.lastImportSource})`
-                      : "No imports yet"}
-                    {p.reportCount ? ` - ${p.reportCount} report${p.reportCount === 1 ? "" : "s"}` : ""}
-                  </p>
+                  <span className="truncate text-sm font-medium text-[var(--ink)]">{p.name}</span>
+                  <span className="truncate font-mono text-xs text-[var(--faint)]">{p.clientName || "-"}</span>
+                  <span className="text-right font-mono text-sm">{p.openTotal}</span>
+                  <span
+                    className="text-right font-mono text-sm"
+                    style={crit > 0 ? { color: "var(--bad)" } : { color: "var(--faint)" }}
+                  >
+                    {crit}
+                  </span>
+                  <span className="text-right font-mono text-xs text-[var(--faint)]">
+                    {p.lastImportAt ? p.lastImportAt.toISOString().slice(0, 10) : "never"}
+                  </span>
                 </Link>
-              </li>
-            );
-          })}
-        </ul>
+              );
+            })}
+          </div>
+          <p className="font-mono text-xs text-[var(--faint)]">
+            published reports: {projects.reduce((a, p) => a + p.reportCount, 0)} across all projects
+          </p>
+        </>
       )}
     </div>
   );

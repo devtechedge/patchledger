@@ -26,8 +26,9 @@ export default async function ReportsPage({ params }: PageProps<"/p/[id]/reports
         <Link href={`/p/${project.id}`} className="text-sm text-[var(--muted)] hover:text-[var(--ink)]">
           &larr; {project.name}
         </Link>
-        <h1 className="mt-2 text-2xl font-bold tracking-tight">Client reports</h1>
-        <p className="mt-1 text-sm text-[var(--muted)]">
+        <p className="microlabel">Client reports</p>
+        <h1 className="mt-1 font-display text-2xl font-semibold tracking-tight">{project.name} / reports</h1>
+        <p className="mt-1 max-w-2xl text-sm text-[var(--muted)]">
           Reports freeze the current state at generation time; shared links keep showing exactly
           what was generated. Revoking a link makes it 404 immediately.
         </p>
@@ -45,7 +46,7 @@ export default async function ReportsPage({ params }: PageProps<"/p/[id]/reports
             {reports.map((r) => (
               <li
                 key={r.id}
-                className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[var(--border)] bg-[var(--bg)] px-4 py-3 text-sm"
+                className="flex flex-wrap items-center justify-between gap-3 border border-[var(--border)] bg-[var(--surface-2)] px-4 py-3 text-sm"
               >
                 <div>
                   <p className="font-semibold">{r.title}</p>

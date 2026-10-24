@@ -1,33 +1,40 @@
+/* Shared primitives for the "ledger" identity: sharp corners, hairline rules,
+   mono uppercase tags. Data text uses the mono font; prose uses Plex Sans. */
+
 const SEVERITY_STYLE: Record<string, string> = {
-  critical: "bg-red-100 text-red-800 border-red-200",
-  high: "bg-orange-100 text-orange-800 border-orange-200",
-  medium: "bg-amber-100 text-amber-800 border-amber-200",
-  low: "bg-slate-100 text-slate-700 border-slate-200",
-  unknown: "bg-slate-100 text-slate-500 border-slate-200",
+  critical: "border-[var(--bad)] text-[var(--bad)]",
+  high: "border-[var(--warn)] text-[var(--warn)]",
+  medium: "border-[var(--med)] text-[var(--med)]",
+  low: "border-[var(--low)] text-[var(--low)]",
+  unknown: "border-[var(--faint)] text-[var(--faint)]",
 };
 
 const STATUS_STYLE: Record<string, string> = {
-  open: "bg-red-50 text-red-700 border-red-200",
-  in_progress: "bg-blue-50 text-blue-700 border-blue-200",
-  fixed: "bg-emerald-50 text-emerald-700 border-emerald-200",
-  verified: "bg-emerald-100 text-emerald-900 border-emerald-300",
-  false_positive: "bg-slate-50 text-slate-600 border-slate-200",
-  accepted: "bg-violet-50 text-violet-700 border-violet-200",
+  open: "border-[var(--bad)] text-[var(--bad)]",
+  in_progress: "border-[var(--info)] text-[var(--info)]",
+  fixed: "border-[var(--good)] text-[var(--good)]",
+  verified: "border-[var(--good)] text-[var(--good)]",
+  false_positive: "border-[var(--faint)] text-[var(--faint)]",
+  accepted: "border-[var(--note)] text-[var(--note)]",
 };
 
 export function SeverityChip({ severity }: { severity: string }) {
   const cls = SEVERITY_STYLE[severity] ?? SEVERITY_STYLE.unknown;
   return (
-    <span className={`inline-block rounded-full border px-2 py-0.5 text-xs font-semibold ${cls}`}>
+    <span
+      className={`inline-block border px-1.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] ${cls}`}
+    >
       {severity}
     </span>
   );
 }
 
 export function StatusChip({ status }: { status: string }) {
-  const cls = STATUS_STYLE[status] ?? "bg-slate-50 text-slate-600 border-slate-200";
+  const cls = STATUS_STYLE[status] ?? "border-[var(--faint)] text-[var(--faint)]";
   return (
-    <span className={`inline-block rounded-full border px-2 py-0.5 text-xs font-semibold ${cls}`}>
+    <span
+      className={`inline-block border px-1.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] ${cls}`}
+    >
       {status.replace("_", " ")}
     </span>
   );
@@ -35,7 +42,7 @@ export function StatusChip({ status }: { status: string }) {
 
 export function Empty({ children }: { children: React.ReactNode }) {
   return (
-    <div className="rounded-xl border border-dashed border-[var(--border)] bg-[var(--surface)] px-6 py-10 text-center text-sm text-[var(--muted)]">
+    <div className="border border-dashed border-[var(--border-strong)] bg-transparent px-6 py-10 text-center font-mono text-sm text-[var(--muted)]">
       {children}
     </div>
   );
@@ -43,20 +50,50 @@ export function Empty({ children }: { children: React.ReactNode }) {
 
 export function Panel({
   title,
+  index,
   children,
   right,
 }: {
   title: string;
+  index?: string;
   children: React.ReactNode;
   right?: React.ReactNode;
 }) {
   return (
-    <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6">
-      <div className="mb-4 flex items-center justify-between gap-3">
-        <h2 className="font-semibold">{title}</h2>
+    <section className="border border-[var(--border)] bg-[var(--surface)]">
+      <div className="mb-5 flex items-center justify-between gap-3 border-b border-[var(--border)] px-5 py-3">
+        <h2 className="microlabel">
+          {index ? `${index} / ` : ""}
+          {title}
+        </h2>
         {right}
       </div>
-      {children}
+      <div className="px-5 pb-5">{children}</div>
     </section>
+  );
+}
+
+export function Stat({
+  label,
+  value,
+  note,
+  tone,
+}: {
+  label: string;
+  value: string;
+  note?: string;
+  tone?: "bad";
+}) {
+  return (
+    <div className="border border-[var(--border)] bg-[var(--surface)] px-5 py-4">
+      <p className="microlabel">{label}</p>
+      <p
+        className="mt-2 font-display text-3xl font-semibold tracking-tight"
+        style={tone === "bad" ? { color: "var(--bad)" } : undefined}
+      >
+        {value}
+      </p>
+      {note ? <p className="mt-1 font-mono text-xs text-[var(--faint)]">{note}</p> : null}
+    </div>
   );
 }

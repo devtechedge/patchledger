@@ -14,21 +14,21 @@ import {
 import { logoutAction } from "@/app/actions";
 
 const inputCls =
-  "w-full rounded-lg border border-[var(--border)] bg-[var(--bg)] px-3 py-2 text-sm outline-none focus:border-[var(--accent)]";
+  "w-full border border-[var(--border)] bg-[var(--bg)] px-3 py-2 text-sm text-[var(--ink)] outline-none focus:border-[var(--accent)]";
 const buttonCls =
-  "rounded-lg px-4 py-2 text-sm font-semibold text-white disabled:opacity-60";
+  "bg-[var(--accent)] px-5 py-2.5 font-mono text-xs font-semibold uppercase tracking-[0.18em] text-[var(--accent-ink)] transition-colors hover:brightness-110 disabled:opacity-60";
 
 function Msg({ state }: { state: DashState }) {
   if (state.error) {
     return (
-      <p role="alert" className="rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-800">
+      <p role="alert" className="border border-[var(--bad)] bg-[var(--bad)]/10 px-3 py-2 text-sm text-[var(--bad)]">
         {state.error}
       </p>
     );
   }
   if (state.ok) {
     return (
-      <p role="status" className="rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
+      <p role="status" className="border border-[var(--good)] bg-[var(--good)]/10 px-3 py-2 text-sm text-[var(--good)]">
         {state.ok}{" "}
         {state.link ? (
           <a href={state.link} className="font-semibold underline" style={{ color: "var(--accent)" }}>
@@ -143,7 +143,7 @@ function TransitionForm({
 }) {
   const [state, action, pending] = useActionState<DashState, FormData>(transitionAction, {});
   return (
-    <form action={action} className="grid gap-2 rounded-xl border border-[var(--border)] bg-[var(--bg)] p-4">
+    <form action={action} className="grid gap-2 border border-[var(--border)] bg-[var(--surface-2)] p-4">
       <input type="hidden" name="findingId" value={findingId} />
       <input type="hidden" name="projectId" value={projectId} />
       <input type="hidden" name="toStatus" value={toStatus} />
@@ -413,7 +413,7 @@ export function DeleteAccountForm() {
         Type DELETE to permanently remove your account, projects, findings and reports
         <input name="confirm" className={inputCls} placeholder="DELETE" autoComplete="off" />
       </label>
-      <button type="submit" disabled={pending} className="rounded-lg border border-red-300 bg-red-50 px-4 py-2 text-sm font-semibold text-red-800 disabled:opacity-60">
+      <button type="submit" disabled={pending} className="border border-[var(--bad)] px-5 py-2.5 font-mono text-xs font-semibold uppercase tracking-[0.18em] text-[var(--bad)] hover:bg-[var(--bad)]/10 disabled:opacity-60">
         {pending ? "Deleting..." : "Delete my account"}
       </button>
     </form>
