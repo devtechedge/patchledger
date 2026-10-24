@@ -85,9 +85,8 @@ const card = `<!doctype html><html><head><meta charset="utf-8"><style>
   .tag { margin-top: 36px; font-size: 46px; line-height: 1.15; font-weight: 700;
     letter-spacing: -0.5px; max-width: 1000px; }
   .tag em { color: #f59e0b; font-style: normal; }
-  .sub { margin-top: 26px; font-size: 24px; color: #9aa6b6; }
-  ul { margin: 0; padding: 0; list-style: none; position: absolute; left: 96px; bottom: 84px;
-    display: flex; gap: 14px; }
+  .sub { margin-top: 22px; font-size: 23px; color: #9aa6b6; }
+  ul { margin: 44px 0 0; padding: 0; list-style: none; display: flex; gap: 14px; }
   li { font-family: ui-monospace, monospace; font-size: 15px; letter-spacing: 0.14em;
     color: #9aa6b6; border: 1px solid #232b37; padding: 8px 18px; background: #12161d;
     text-transform: uppercase; }
