@@ -140,7 +140,7 @@ export function ReportView({
             <p className="mt-4 border-l-2 pl-3 font-mono text-xs text-[var(--faint)]" style={{ borderColor: brand }}>
               source of record: {SOURCE_LABEL[summary.latestImport.source] ?? summary.latestImport.source},{" "}
               imported {summary.latestImport.importedAt.slice(0, 10)} ({summary.latestImport.findingCount} advisories
-              reported at import time)
+              reported at import time). Report generated {summary.generatedAt.slice(0, 10)} - data as of that date.
             </p>
           ) : null}
         </div>
