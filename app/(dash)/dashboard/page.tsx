@@ -39,10 +39,10 @@ export default async function DashboardPage() {
             <CreateProjectForm />
           </Panel>
 
-          <div className="border border-[var(--border)]">
+          <div className="border border-[var(--border)]" role="table" aria-label="Client projects with open finding counts and last import dates">
             <div className="overflow-x-auto">
               <div className="min-w-[640px]">
-                <div className="grid grid-cols-[1.4fr_1fr_110px_90px_150px] gap-x-4 border-b border-[var(--border)] bg-[var(--surface-2)] px-4 py-2.5">
+                <div className="grid grid-cols-[1.4fr_1fr_110px_90px_150px] gap-x-4 border-b border-[var(--border)] bg-[var(--surface-2)] px-4 py-2.5" role="row">
                   <span className="microlabel">project</span>
                   <span className="microlabel">client</span>
                   <span className="microlabel text-right">open</span>

@@ -108,13 +108,14 @@ export default async function ProjectPage({
       </div>
 
       <Panel title="Findings" index="R">
-        <div className="mb-5 flex flex-wrap gap-2">
+        <div className="mb-5 flex flex-wrap gap-2" role="group" aria-label="Filter findings by status and severity">
           {STATUS_FILTERS.map((s) => {
             const active = status === s || (!status && !s);
             return (
               <Link
                 key={s || "all"}
                 href={qs({ status: s || undefined })}
+                aria-current={active ? "true" : undefined}
                 className={`border px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.14em] ${active ? "border-[var(--accent)] text-[var(--accent)]" : "border-[var(--border)] text-[var(--faint)] hover:text-[var(--ink)]"}`}
               >
                 {s ? s.replace("_", " ") : "all"}
@@ -128,6 +129,7 @@ export default async function ProjectPage({
               <Link
                 key={s || "allsev"}
                 href={qs({ severity: s || undefined })}
+                aria-current={active ? "true" : undefined}
                 className={`border px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.14em] ${active ? "border-[var(--accent)] text-[var(--accent)]" : "border-[var(--border)] text-[var(--faint)] hover:text-[var(--ink)]"}`}
               >
                 {s ? s : "sev: any"}
