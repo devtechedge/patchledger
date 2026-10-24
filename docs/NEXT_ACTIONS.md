@@ -22,3 +22,4 @@ Updated: 2026-10-24 (session 1 end + deploy session). Live: https://patchledger.
 4. Multi-user teams (today: single account per agency).
 5. Email delivery of reports on a schedule (needs an email provider decision).
 6. Lemon Squeezy checkout + webhook once a pilot asks to pay.
+7. Manual leftover (only human step, no API): upload docs/screenshots/social-preview.png (already committed, 1280x640, under 1 MB) at GitHub repo Settings -> General -> Social preview. Verify afterwards that og:image on the repo page starts with repository-images.githubusercontent.com.
