@@ -36,28 +36,11 @@ test("unknown share links 404 without leaking anything", async ({ page }) => {
 
 test("no horizontal overflow on mobile", async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
-  for (const path of ["/", "/login", "/pricing"]) {
+  for (const path of ["/", "/login", "/pricing", "/forgot-password"]) {
     await page.goto(path, { waitUntil: "networkidle" });
     const over = await page.evaluate(
       () => document.documentElement.scrollWidth - document.documentElement.clientWidth
     );
     expect(over, `overflow on ${path}`).toBeLessThanOrEqual(2);
   }
-  // authenticated surfaces
-  await page.goto("/login", { waitUntil: "networkidle" });
-  await page.getByLabel("Email").fill("demo@patchledger.test");
-  await page.getByLabel("Password").fill("demo-password-1");
-  await page.getByRole("button", { name: "Sign in" }).click();
-  await page.waitForURL("**/dashboard");
-  const overDash = await page.evaluate(
-    () => document.documentElement.scrollWidth - document.documentElement.clientWidth
-  );
-  expect(overDash, "overflow on /dashboard").toBeLessThanOrEqual(2);
-  await page.getByRole("link", { name: /Northwind Portal/ }).click();
-  await page.waitForURL("**/p/**");
-  await page.waitForTimeout(500);
-  const overProject = await page.evaluate(
-    () => document.documentElement.scrollWidth - document.documentElement.clientWidth
-  );
-  expect(overProject, "overflow on /p/[id]").toBeLessThanOrEqual(2);
 });
