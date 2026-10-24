@@ -60,12 +60,12 @@ function FindingRows({
           <p className="mt-1 flex flex-wrap gap-x-4 gap-y-1 font-mono text-xs text-[var(--faint)]">
             {f.fixedInVersion ? <span>fixed in {f.fixedInVersion}</span> : null}
             {f.fixUrl ? (
-              <a href={f.fixUrl} className="underline" style={{ color: "var(--accent)" }}>
+              <a href={f.fixUrl} className="underline" style={{ color: "var(--brand, var(--accent))" }}>
                 fix reference
               </a>
             ) : null}
             {f.verifyUrl ? (
-              <a href={f.verifyUrl} className="underline" style={{ color: "var(--accent)" }}>
+              <a href={f.verifyUrl} className="underline" style={{ color: "var(--brand, var(--accent))" }}>
                 verification run ({f.verifyType ?? "evidence"})
               </a>
             ) : null}
@@ -82,6 +82,15 @@ const SOURCE_LABEL: Record<string, string> = {
   npm_audit: "npm audit",
   osv_scanner: "osv-scanner",
 };
+
+/** Valid hex or the ledger amber fallback; text on the brand band flips to dark on light colors. */
+export function brandColors(accentColor: string): { brand: string; onBrand: string } {
+  const brand = /^#[0-9a-fA-F]{6}$/.test(accentColor) ? accentColor : "#f59e0b";
+  const n = parseInt(brand.slice(1), 16);
+  const lum =
+    (0.2126 * ((n >> 16) & 255) + 0.7152 * ((n >> 8) & 255) + 0.0722 * (n & 255)) / 255;
+  return { brand, onBrand: lum > 0.55 ? "#17120a" : "#ffffff" };
+}
 
 /**
  * Renders the frozen report summary. Used by the public share page; the
@@ -102,18 +111,22 @@ export function ReportView({
   periodLabel: string;
 }) {
   const openCounts = Object.entries(summary.counts.bySeverity).filter(([, n]) => n > 0);
+  const { brand, onBrand } = brandColors(branding.accentColor);
 
   return (
-    <article className="mx-auto grid max-w-3xl gap-6 px-6 py-10">
-      <header className="border-2 border-[var(--border-strong)] bg-[var(--surface)]">
+    <article
+      className="mx-auto grid max-w-3xl gap-6 px-6 py-10"
+      style={{ ["--brand" as string]: brand } as React.CSSProperties}
+    >
+      <header className="border-2 bg-[var(--surface)]" style={{ borderColor: brand }}>
         <div
           className="flex items-center justify-between px-8 py-3"
-          style={{ background: "var(--accent)" }}
+          style={{ background: brand, color: onBrand }}
         >
-          <span className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-[var(--accent-ink)]">
+          <span className="font-mono text-xs font-bold uppercase tracking-[0.2em]">
             {branding.agencyName || "Maintenance report"}
           </span>
-          <span className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-[var(--accent-ink)]">
+          <span className="font-mono text-xs font-semibold uppercase tracking-[0.2em]">
             {periodLabel}
           </span>
         </div>
@@ -124,7 +137,7 @@ export function ReportView({
             project: {summary.project.name}
           </p>
           {summary.latestImport ? (
-            <p className="mt-4 border-l-2 border-[var(--border-strong)] pl-3 font-mono text-xs text-[var(--faint)]">
+            <p className="mt-4 border-l-2 pl-3 font-mono text-xs text-[var(--faint)]" style={{ borderColor: brand }}>
               source of record: {SOURCE_LABEL[summary.latestImport.source] ?? summary.latestImport.source},{" "}
               imported {summary.latestImport.importedAt.slice(0, 10)} ({summary.latestImport.findingCount} advisories
               reported at import time)
